@@ -13,5 +13,10 @@ UCLASS()
 class NEKIRO_API AK_PlayerController : public APlayerController
 {
 	GENERATED_BODY()
+
+public:
+	AK_PlayerController();
+
+	virtual void BeginPlay () override;
 	
 };
