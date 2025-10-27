@@ -21,10 +21,16 @@ AK_Player::AK_Player()
 
 	springArmComp = CreateDefaultSubobject<USpringArmComponent> ( TEXT ( "SpringArmComp" ) );
 	springArmComp->SetupAttachment ( GetRootComponent () );
+	springArmComp->SetRelativeLocation ( FVector ( 0.f , 0.f , 70.f ) );
+	springArmComp->TargetArmLength = 300.f;
+	springArmComp->bUsePawnControlRotation = true;
 
 	cameraComp = CreateDefaultSubobject<UCameraComponent> ( TEXT ( "CameraComp" ) );
 	cameraComp->SetupAttachment ( springArmComp);
-	cameraComp->SetRelativeLocation ( FVector ( 0.f , 0.f , 90.f ) );
+	cameraComp->bUsePawnControlRotation = false;
+
+	bUseControllerRotationYaw = true;
+	GetCharacterMovement ()->bOrientRotationToMovement = false;
 
 	meshComp = GetMesh ();
 	static ConstructorHelpers::FObjectFinder<USkeletalMesh> tempMesh ( TEXT ( "/Script/Engine.SkeletalMesh'/Game/Assets/Character/ParagonKwang/Characters/Heroes/Kwang/Skins/Tier2/Kwang_Manban/Meshes/KwangManbun.KwangManbun'" ) );
@@ -134,7 +140,7 @@ void AK_Player::PlayerLook ( const FInputActionValue& value )
 	AK_PlayerController* pc = Cast<AK_PlayerController> ( GetController () );
 	if (pc)
 	{
-		AddControllerYawInput ( lookAxisVector.X * mouseSensitivity );
+		AddControllerYawInput ( -lookAxisVector.X * mouseSensitivity );
 		AddControllerPitchInput ( -lookAxisVector.Y * mouseSensitivity );
 	}
 }
