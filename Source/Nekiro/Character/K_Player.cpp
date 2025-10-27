@@ -1,5 +1,10 @@
 ﻿// Fill out your copyright notice in the Description page of Project Settings.
 #include "K_Player.h"
+#include "Camera/CameraComponent.h"
+#include "GameFramework/SpringArmComponent.h"
+#include <EnhancedInputSubsystems.h>
+#include <EnhancedInputComponent.h>
+#include "K_PlayerController.h"
 
 // Sets default values
 AK_Player::AK_Player()
@@ -10,24 +15,25 @@ AK_Player::AK_Player()
 	statusComp = CreateDefaultSubobject<UK_StatusComp> ( TEXT ( "StatusComp" ) );
 	actionComp = CreateDefaultSubobject<UK_ActionComp> ( TEXT ( "ActionComp" ) );
 
-	//Input Actions
-	IMC_Player = TSoftObjectPtr<UInputMappingContext> ( FSoftObjectPath ( TEXT ( "/Script/EnhancedInput.InputMappingContext'/Game/Input/IMC_PLAYER.IMC_PLAYER'" ) ) );
-	IA_Move = TSoftObjectPtr<UInputAction> ( FSoftObjectPath ( TEXT ( "/Script/EnhancedInput.InputAction'/Game/Input/IA_MOVE.IA_MOVE'" ) ) );
-	IA_Look = TSoftObjectPtr<UInputAction> ( FSoftObjectPath ( TEXT ( "/Script/EnhancedInput.InputAction'/Game/Input/IA_LOOK.IA_LOOK'" ) ) );
-	IA_Jump = TSoftObjectPtr<UInputAction> ( FSoftObjectPath ( TEXT ( "/Script/EnhancedInput.InputAction'/Game/Input/IA_JUMP.IA_JUMP'" ) ) );
-	IA_Function = TSoftObjectPtr<UInputAction> ( FSoftObjectPath ( TEXT ( "/Script/EnhancedInput.InputAction'/Game/Input/IA_FUNCTION.IA_FUNCTION'" ) ) );
-	IA_Finish = TSoftObjectPtr<UInputAction> ( FSoftObjectPath ( TEXT ( "/Script/EnhancedInput.InputAction'/Game/Input/IA_FINISH.IA_FINISH'" ) ) );
-	IA_Defense = TSoftObjectPtr<UInputAction> ( FSoftObjectPath ( TEXT ( "/Script/EnhancedInput.InputAction'/Game/Input/IA_DEFENSE.IA_DEFENSE'" ) ) );
-	IA_Dash = TSoftObjectPtr<UInputAction> ( FSoftObjectPath ( TEXT ( "/Script/EnhancedInput.InputAction'/Game/Input/IA_DASH.IA_DASH'" ) ) );
-	IA_Crouch = TSoftObjectPtr<UInputAction> ( FSoftObjectPath ( TEXT ( "/Script/EnhancedInput.InputAction'/Game/Input/IA_CROUCH.IA_CROUCH'" ) ) );
-	IA_Attack = TSoftObjectPtr<UInputAction> ( FSoftObjectPath ( TEXT ( "/Script/EnhancedInput.InputAction'/Game/Input/IA_ATTACK.IA_ATTACK'" ) ) );
+	springArmComp = CreateDefaultSubobject<USpringArmComponent> ( TEXT ( "SpringArmComp" ) );
+	springArmComp->SetupAttachment ( GetRootComponent () );
 
-	//Data Assets
-	damageDataAsset = TSoftObjectPtr<UK_DamageData> ( FSoftObjectPath ( TEXT ( "/Script/Nekiro.K_DamageData'/Game/Blueprints/DataAssets/DA_PlayerDamage.DA_PlayerDamage'" ) ) );
-	comboDataAsset = TSoftObjectPtr<UK_ComboData> ( FSoftObjectPath ( TEXT ( "/Script/Nekiro.K_ComboData'/Game/Blueprints/DataAssets/DA_PlayerCombo.DA_PlayerCombo'" ) ) );
-	defenseDataAsset = TSoftObjectPtr<UK_DefenseData> ( FSoftObjectPath ( TEXT ( "/Script/Nekiro.K_DefenseData'/Game/Blueprints/DataAssets/DA_PlayerDefense.DA_PlayerDefense'" ) ) );
-	movementDataAsset = TSoftObjectPtr<UK_MovementData> ( FSoftObjectPath ( TEXT ( "/Script/Nekiro.K_MovementData'/Game/Blueprints/DataAssets/DA_PlayerMovement.DA_PlayerMovement'" ) ) );
-	postureDataAsset = TSoftObjectPtr<UK_PostureData> ( FSoftObjectPath ( TEXT ( "/Script/Nekiro.K_PostureData'/Game/Blueprints/DataAssets/DA_PlayerPosture.DA_PlayerPosture'" ) ) );
+	cameraComp = CreateDefaultSubobject<UCameraComponent> ( TEXT ( "CameraComp" ) );
+	cameraComp->SetupAttachment ( springArmComp);
+	cameraComp->SetRelativeLocation ( FVector ( 0.f , 0.f , 90.f ) );
+	//cameraComp->bUsePawnControlRotation = true;
+
+	meshComp = GetMesh ();
+	meshComp->SetupAttachment ( GetRootComponent () );
+	static ConstructorHelpers::FObjectFinder<USkeletalMesh> tempMesh ( TEXT ( "/Script/Engine.SkeletalMesh'/Game/Assets/Character/ParagonKwang/Characters/Heroes/Kwang/Skins/Tier2/Kwang_Manban/Meshes/KwangManbun.KwangManbun'" ) );
+	if (tempMesh.Succeeded ())
+	{
+		meshComp->SetSkeletalMesh ( tempMesh.Object );
+		meshComp->SetRelativeLocation ( FVector ( 0.f , 0.f , -90.f ) );
+		meshComp->SetRelativeRotation ( FRotator ( 0.f , -90.f , 0.f ) );
+		meshComp->SetWorldScale3D ( FVector ( 0.9f , 0.9f , 0.9f ) );
+	}
+
 }
 
 // Called when the game starts or when spawned
@@ -35,6 +41,26 @@ void AK_Player::BeginPlay()
 {
 	Super::BeginPlay();
 	
+	AK_PlayerController* pc = Cast<AK_PlayerController> ( GetController () );
+	if (pc)
+	{
+		UEnhancedInputLocalPlayerSubsystem* subsys = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem> ( pc->GetLocalPlayer () );
+		if (subsys)
+		{
+			subsys->AddMappingContext ( IMC_Player , 0 );
+			UE_LOG ( LogTemp , Warning , TEXT ( "Input Mapping Context Added!" ) );
+		}
+		else
+		{
+			UE_LOG ( LogTemp , Warning , TEXT ( "No Enhanced Input Subsystem found!" ) );
+			return;
+		}
+	}
+	else
+	{
+		UE_LOG ( LogTemp , Warning , TEXT ( "No Player Controller found!" ) );
+		return;
+	}
 }
 
 // Called every frame
@@ -49,5 +75,77 @@ void AK_Player::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
+	UEnhancedInputComponent* inputComp = Cast<UEnhancedInputComponent> ( PlayerInputComponent );
+	if (inputComp)
+	{
+		inputComp->BindAction ( IA_Move , ETriggerEvent::Triggered , this , &AK_Player::PlayerMove );
+		inputComp->BindAction ( IA_Dash , ETriggerEvent::Started , this , &AK_Player::PlayerDash );
+		inputComp->BindAction ( IA_Look , ETriggerEvent::Triggered , this , &AK_Player::PlayerLook );
+		inputComp->BindAction ( IA_Jump , ETriggerEvent::Started , this , &AK_Player::PlayerJump );
+		inputComp->BindAction ( IA_Crouch , ETriggerEvent::Started , this , &AK_Player::PlayerCrouch );
+		inputComp->BindAction ( IA_Function , ETriggerEvent::Started , this , &AK_Player::PlayerInteraction );
+		inputComp->BindAction ( IA_Finish , ETriggerEvent::Started , this , &AK_Player::PlayerFinish );
+		inputComp->BindAction ( IA_Defense , ETriggerEvent::Started , this , &AK_Player::PlayerDefense );
+		inputComp->BindAction ( IA_Attack , ETriggerEvent::Started , this , &AK_Player::PlayerAttack );
+	}
+}
+
+void AK_Player::PlayerMove ( const FInputActionValue& value )
+{
+	FVector2D inputVector = value.Get<FVector2D> ();
+
+	AK_PlayerController* pc = Cast<AK_PlayerController> ( GetController () );
+	if (pc)
+	{
+		const FRotator controlRot = pc->GetControlRotation ();
+		const FRotator yawRot ( 0.f , controlRot.Yaw , 0.f );
+
+		const FVector forwardDir = FRotationMatrix ( yawRot ).GetUnitAxis ( EAxis::X );
+		const FVector rightDir = FRotationMatrix ( yawRot ).GetUnitAxis ( EAxis::Y );
+
+		AddMovementInput ( forwardDir , inputVector.Y );
+		AddMovementInput ( rightDir , inputVector.X );
+	}
+}
+
+void AK_Player::PlayerLook ( const FInputActionValue& value )
+{
+	FVector2D lookAxisVector = value.Get<FVector2D> ();
+
+	AK_PlayerController* pc = Cast<AK_PlayerController> ( GetController () );
+	if (pc)
+	{
+		AddControllerYawInput ( lookAxisVector.X * mouseSensitivity );
+		AddControllerPitchInput ( -lookAxisVector.Y * mouseSensitivity );
+	}
+}
+
+void AK_Player::PlayerJump ()
+{
+	Jump ();
+}
+
+void AK_Player::PlayerDash ( const FInputActionValue& value )
+{
+}
+
+void AK_Player::PlayerCrouch ( const FInputActionValue& value )
+{
+}
+
+void AK_Player::PlayerAttack ()
+{
+}
+
+void AK_Player::PlayerInteraction ()
+{
+}
+
+void AK_Player::PlayerFinish ()
+{
+}
+
+void AK_Player::PlayerDefense ()
+{
 }
 

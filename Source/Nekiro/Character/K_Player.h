@@ -4,12 +4,14 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "InputActionValue.h"
 
 #include "Nekiro/Components/K_StatusComp.h"
 #include "Nekiro/Components/K_ActionComp.h"
 #include "Nekiro/Data/K_DataAssets.h"
 
 #include "K_Player.generated.h"
+
 
 
 UCLASS()
@@ -34,6 +36,18 @@ public:
 
 
 
+	void PlayerMove ( const FInputActionValue& value );
+	void PlayerLook ( const FInputActionValue& value );
+	void PlayerDash ( const FInputActionValue& value );
+	void PlayerCrouch ( const FInputActionValue& value );
+	void PlayerJump ();
+	void PlayerAttack ();
+	void PlayerInteraction ();
+	void PlayerFinish ();
+	void PlayerDefense ();
+
+
+
 
 	UFUNCTION ( BlueprintPure , Category = "NEKIRO|Components" )
 	UK_StatusComp* GetStatusComp () const { return statusComp; }
@@ -44,7 +58,12 @@ public:
 
 
 private:
+	UPROPERTY ( VisibleAnywhere , BlueprintReadOnly , Category = "NEKIRO|Settings" , meta = (AllowPrivateAccess = "true") )
+	float mouseSensitivity = 0.3f;
+
 	//Components
+	UPROPERTY ( VisibleAnywhere , BlueprintReadOnly , Category = "NEKIRO|Components" , meta = (AllowPrivateAccess = "true") )
+	class USpringArmComponent* springArmComp;
 
 	UPROPERTY ( VisibleAnywhere , BlueprintReadOnly , Category = "NEKIRO|Components" , meta = (AllowPrivateAccess = "true") )
 	class UCameraComponent* cameraComp;
@@ -60,49 +79,49 @@ private:
 
 	//IMC
 	UPROPERTY ( EditDefaultsOnly, BlueprintReadOnly , Category = "NEKIRO|Input" , meta = (AllowPrivateAccess = "true") )
-	TSoftObjectPtr<class UInputMappingContext> IMC_Player;
+	class UInputMappingContext* IMC_Player;
 
 	UPROPERTY ( EditDefaultsOnly, BlueprintReadOnly , Category = "NEKIRO|Input" , meta = (AllowPrivateAccess = "true") )
-	TSoftObjectPtr<class UInputAction> IA_Move;
+	class UInputAction* IA_Move;
 
 	UPROPERTY ( EditDefaultsOnly, BlueprintReadOnly , Category = "NEKIRO|Input" , meta = (AllowPrivateAccess = "true") )
-	TSoftObjectPtr<class UInputAction> IA_Look;
+	class UInputAction* IA_Look;
 
 	UPROPERTY ( EditDefaultsOnly , BlueprintReadOnly , Category = "NEKIRO|Input" , meta = (AllowPrivateAccess = "true") )
-	TSoftObjectPtr<class UInputAction> IA_Jump;
+	class UInputAction* IA_Jump;
 
 	UPROPERTY ( EditDefaultsOnly , BlueprintReadOnly , Category = "NEKIRO|Input" , meta = (AllowPrivateAccess = "true") )
-	TSoftObjectPtr<class UInputAction> IA_Function;
+	class UInputAction* IA_Function;
 
 	UPROPERTY ( EditDefaultsOnly , BlueprintReadOnly , Category = "NEKIRO|Input" , meta = (AllowPrivateAccess = "true") )
-	TSoftObjectPtr<class UInputAction> IA_Finish;
+	class UInputAction* IA_Finish;
 
 	UPROPERTY ( EditDefaultsOnly , BlueprintReadOnly , Category = "NEKIRO|Input" , meta = (AllowPrivateAccess = "true") )
-	TSoftObjectPtr<class UInputAction> IA_Defense;
+	class UInputAction* IA_Defense;
 
 	UPROPERTY ( EditDefaultsOnly , BlueprintReadOnly , Category = "NEKIRO|Input" , meta = (AllowPrivateAccess = "true") )
-	TSoftObjectPtr<class UInputAction> IA_Dash;
+	class UInputAction* IA_Dash;
 
 	UPROPERTY ( EditDefaultsOnly , BlueprintReadOnly , Category = "NEKIRO|Input" , meta = (AllowPrivateAccess = "true") )
-	TSoftObjectPtr<class UInputAction> IA_Crouch;
+	class UInputAction* IA_Crouch;
 
 	UPROPERTY ( EditDefaultsOnly , BlueprintReadOnly , Category = "NEKIRO|Input" , meta = (AllowPrivateAccess = "true") )
-	TSoftObjectPtr<class UInputAction> IA_Attack;
+	class UInputAction* IA_Attack;
 
 	//Data Assets
 	UPROPERTY ( EditDefaultsOnly , BlueprintReadOnly , Category = "NEKIRO|DataAssets" , meta = (AllowPrivateAccess = "true" , ToolTip = "Player Damage Data Asset") )
-	TSoftObjectPtr<UK_DamageData> damageDataAsset;
+	UK_DamageData* damageDataAsset;
 
 	UPROPERTY ( EditDefaultsOnly , BlueprintReadOnly , Category = "NEKIRO|DataAssets" , meta = (AllowPrivateAccess = "true" , ToolTip = "Player Combo Data Asset") )
-	TSoftObjectPtr<UK_ComboData> comboDataAsset;
+	UK_DamageData* comboDataAsset;
 
 	UPROPERTY ( EditDefaultsOnly , BlueprintReadOnly , Category = "NEKIRO|DataAssets" , meta = (AllowPrivateAccess = "true" , ToolTip = "Player Defense Data Asset") )
-	TSoftObjectPtr<UK_DefenseData> defenseDataAsset;
+	UK_DefenseData* defenseDataAsset;
 
 	UPROPERTY ( EditDefaultsOnly , BlueprintReadOnly , Category = "NEKIRO|DataAssets" , meta = (AllowPrivateAccess = "true" , ToolTip = "Player Movement Data Asset") )
-	TSoftObjectPtr<UK_MovementData> movementDataAsset;
+	UK_MovementData* movementDataAsset;
 
 	UPROPERTY ( EditDefaultsOnly , BlueprintReadOnly , Category = "NEKIRO|DataAssets" , meta = (AllowPrivateAccess = "true" , ToolTip = "Player Posture Data Asset") )
-	TSoftObjectPtr<UK_PostureData> postureDataAsset;
+	UK_PostureData* postureDataAsset;
 
 };
