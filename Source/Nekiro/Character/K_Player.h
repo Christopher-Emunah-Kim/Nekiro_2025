@@ -9,6 +9,7 @@
 #include "Nekiro/Components/K_StatusComp.h"
 #include "Nekiro/Components/K_ActionComp.h"
 #include "Nekiro/Data/K_DataAssets.h"
+#include "Nekiro/Animation/K_PlayerAnimStates.h"
 
 #include "K_Player.generated.h"
 
@@ -46,7 +47,7 @@ public:
 	void PlayerFinish ();
 	void PlayerDefense ();
 
-
+	void UpdateAnimState ( float deltaTime );
 
 
 	UFUNCTION ( BlueprintPure , Category = "NEKIRO|Components" )
@@ -55,11 +56,21 @@ public:
 	UFUNCTION ( BlueprintPure , Category = "NEKIRO|Components" )
 	UK_ActionComp* GetActionComp () const { return actionComp; }
 
+	UFUNCTION ( BlueprintPure , Category = "NEKIRO|Animation" )
+	const FPlayerAnimStates& GetAnimState () const { return playerAnimStates; }
 
 
 private:
 	UPROPERTY ( VisibleAnywhere , BlueprintReadOnly , Category = "NEKIRO|Settings" , meta = (AllowPrivateAccess = "true") )
 	float mouseSensitivity = 0.3f;
+
+
+	//Animation
+	UPROPERTY ( VisibleAnywhere , BlueprintReadOnly , Category = "NEKIRO|Animation" , meta = (AllowPrivateAccess = "true") )
+	class UK_PlayerAnim* playerAnim;
+
+	UPROPERTY ( VisibleAnywhere , BlueprintReadOnly , Category = "NEKIRO|Animation" , meta = (AllowPrivateAccess = "true") )
+	FPlayerAnimStates playerAnimStates;
 
 	//Components
 	UPROPERTY ( VisibleAnywhere , BlueprintReadOnly , Category = "NEKIRO|Components" , meta = (AllowPrivateAccess = "true") )

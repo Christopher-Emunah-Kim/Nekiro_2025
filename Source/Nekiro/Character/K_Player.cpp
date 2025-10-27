@@ -2,9 +2,13 @@
 #include "K_Player.h"
 #include "Camera/CameraComponent.h"
 #include "GameFramework/SpringArmComponent.h"
+#include "GameFramework/CharacterMovementComponent.h"
+
 #include <EnhancedInputSubsystems.h>
 #include <EnhancedInputComponent.h>
+
 #include "K_PlayerController.h"
+#include "Nekiro/Animation/K_PlayerAnim.h"
 
 // Sets default values
 AK_Player::AK_Player()
@@ -21,10 +25,8 @@ AK_Player::AK_Player()
 	cameraComp = CreateDefaultSubobject<UCameraComponent> ( TEXT ( "CameraComp" ) );
 	cameraComp->SetupAttachment ( springArmComp);
 	cameraComp->SetRelativeLocation ( FVector ( 0.f , 0.f , 90.f ) );
-	//cameraComp->bUsePawnControlRotation = true;
 
 	meshComp = GetMesh ();
-	meshComp->SetupAttachment ( GetRootComponent () );
 	static ConstructorHelpers::FObjectFinder<USkeletalMesh> tempMesh ( TEXT ( "/Script/Engine.SkeletalMesh'/Game/Assets/Character/ParagonKwang/Characters/Heroes/Kwang/Skins/Tier2/Kwang_Manban/Meshes/KwangManbun.KwangManbun'" ) );
 	if (tempMesh.Succeeded ())
 	{
@@ -34,6 +36,11 @@ AK_Player::AK_Player()
 		meshComp->SetWorldScale3D ( FVector ( 0.9f , 0.9f , 0.9f ) );
 	}
 
+	static ConstructorHelpers::FClassFinder<UAnimInstance> tempABP ( TEXT ( "/Script/Engine.AnimBlueprint'/Game/Blueprints/ABP_Player.ABP_Player_C'" ) );
+	if (tempABP.Succeeded ())
+	{
+		meshComp->SetAnimInstanceClass ( tempABP.Class );
+	}
 }
 
 // Called when the game starts or when spawned
@@ -61,6 +68,15 @@ void AK_Player::BeginPlay()
 		UE_LOG ( LogTemp , Warning , TEXT ( "No Player Controller found!" ) );
 		return;
 	}
+
+	playerAnim = Cast<UK_PlayerAnim>(meshComp->GetAnimInstance());
+	if(nullptr == playerAnim)
+	{
+		UE_LOG ( LogTemp , Warning , TEXT ( "No Player Anim Instance found!" ) );
+		return;
+	}
+	playerAnim->SetPlayerCharacter( *this );
+	UpdateAnimState ( 0.f );
 }
 
 // Called every frame
@@ -68,6 +84,7 @@ void AK_Player::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	UpdateAnimState ( DeltaTime );
 }
 
 // Called to bind functionality to input
@@ -106,6 +123,8 @@ void AK_Player::PlayerMove ( const FInputActionValue& value )
 		AddMovementInput ( forwardDir , inputVector.Y );
 		AddMovementInput ( rightDir , inputVector.X );
 	}
+
+	
 }
 
 void AK_Player::PlayerLook ( const FInputActionValue& value )
@@ -147,5 +166,63 @@ void AK_Player::PlayerFinish ()
 
 void AK_Player::PlayerDefense ()
 {
+}
+
+void AK_Player::UpdateAnimState ( float deltaTime )
+{
+	const FVector velocity = GetVelocity ();
+	const float speed = velocity.Size ();
+	playerAnimStates.speed = speed;
+
+	if(speed > 0)
+	{
+		const FRotator rot = GetActorRotation ();
+		const FVector localVelocity = rot.UnrotateVector ( velocity );
+		playerAnimStates.direction = FMath::Atan2 ( localVelocity.Y , localVelocity.X ) * (180.f / PI);
+	}
+	else
+	{
+		playerAnimStates.direction = 0.f;
+	}
+
+	const UCharacterMovementComponent* moveComp = GetCharacterMovement ();
+	bool isInAir = false;
+	if(moveComp)
+	{
+		isInAir = moveComp->IsFalling ();
+	}
+	else
+	{
+		isInAir = false;
+	}
+	playerAnimStates.bIsInAir = isInAir;
+
+	if(isInAir)
+	{
+		playerAnimStates.movementState = EPlayerMovementState::JUMP;
+	}
+	else if(speed > 200.0f)
+	{
+		playerAnimStates.movementState = EPlayerMovementState::RUN;
+	}
+	else if(speed > 0.0f)
+	{
+		playerAnimStates.movementState = EPlayerMovementState::WALK;
+	}
+	else
+	{
+		playerAnimStates.movementState = EPlayerMovementState::IDLE;
+	}
+
+	const bool isAttacking = actionComp && actionComp->IsAttacking ();
+	playerAnimStates.bIsAttack = isAttacking;
+	if(isAttacking)
+	{
+		playerAnimStates.combatState = EPlayerCombatState::Attack;
+	}
+	else
+	{
+		playerAnimStates.combatState = EPlayerCombatState::None;
+	}
 }
 

@@ -25,5 +25,13 @@ public:
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
-		
+	UFUNCTION ( BlueprintCallable , Category = "NEKIRO|Action" )
+	void SetAttackFlag ( bool bNewAttack ) { bIsAttacking = bNewAttack; }
+
+	UFUNCTION ( BlueprintCallable , Category = "NEKIRO|Action" )
+	bool IsAttacking () const { return bIsAttacking; }
+
+private:
+	UPROPERTY ( VisibleAnywhere ,BlueprintReadOnly, Category = "NEKIRO|Components" , meta = (AllowPrivateAccess = "true"))
+	bool bIsAttacking = false;
 };

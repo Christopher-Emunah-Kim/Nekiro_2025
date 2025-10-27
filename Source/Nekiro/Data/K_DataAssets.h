@@ -23,7 +23,7 @@ public:
 	float powerAttackDamage = 45.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "NEKIRO|Damage", meta=(ClampMin="0.0", ToolTip="Critical Damage Multiplier"))
-	float ciriticalDamageMultiplier = 1.5f;
+	float criiticalDamageMultiplier = 1.5f;
 };
 
 
@@ -73,6 +73,9 @@ public:
 
 	UPROPERTY ( EditAnywhere , BlueprintReadOnly , Category = "NEKIRO|Movement" , meta = (ClampMin = "0.0" , ToolTip = "Roll Invincibility Time") )
 	float rollInvincibilityTime = 0.3f; 
+
+	UPROPERTY ( EditAnywhere , BlueprintReadOnly , Category = "NEKIRO|Movement" )
+	bool bIsDashing = false;
 };
 
 
