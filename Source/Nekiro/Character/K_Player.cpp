@@ -140,7 +140,7 @@ void AK_Player::PlayerLook ( const FInputActionValue& value )
 	AK_PlayerController* pc = Cast<AK_PlayerController> ( GetController () );
 	if (pc)
 	{
-		AddControllerYawInput ( -lookAxisVector.X * mouseSensitivity );
+		AddControllerYawInput ( lookAxisVector.X * mouseSensitivity );
 		AddControllerPitchInput ( -lookAxisVector.Y * mouseSensitivity );
 	}
 }
