@@ -48,6 +48,11 @@ public:
 	void OnPlayerGuardStarted ();
 	void OnPlayerGuardCompleted ();
 
+	UFUNCTION()
+	void OnGuardStateChanged ( bool bIsGuarding );
+	UFUNCTION()
+	void OnAttackStateChanged ( bool bIsAttacking , int32 ComboIndex );
+
 
 
 	UFUNCTION ( BlueprintPure , Category = "NEKIRO|Components" )

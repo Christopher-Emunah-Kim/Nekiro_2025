@@ -18,24 +18,42 @@ class NEKIRO_API UK_PlayerAnim : public UAnimInstance
 
 	UK_PlayerAnim () = default;
 
+private:
+	void CalculateSpeedAndDirection ( float DeltaSeconds );
+	void CheckPlayerStates ();
+
 public:
 	virtual void NativeInitializeAnimation () override;
 	virtual void NativeUpdateAnimation ( float DeltaSeconds ) override;
 
 	void UpdateAnimStates ( float DeltaSeconds );
-	void CalculateSpeedAndDirection ( float DeltaSeconds );
-	void CheckPlayerStates ();
+
+	void EnterGuardState ();
+	void ExitGuardState ();
+
+	void EnterAttatkState (int32 comboIndex);
+	void ExitAttackState ();
+
+
+	/*UFUNCTION ()
+	void AnimNotify_DamageEnd ();
+	UFUNCTION ()
+	void AnimNotify_DieEnd ();*/
+	//void UEnemyAnimInstance::AnimNotify_DamageEnd ()
+	//{
+	//	//몽타주 재생을 멈추고싶다.
+	//	Montage_Stop ( 0.1f , EnemyMontage );
+	//}
+
+	//void UEnemyAnimInstance::AnimNotify_DieEnd ()
+	//{
+	//	//몽타주 재생을 멈추고싶다.
+	//	Montage_Stop ( 0.1f , EnemyMontage );
+	//}
+
 
 	void SetPlayerCharacter ( class AK_Player& player );
-	void SetIsInAir ( const bool bInAir ) { m_playerAnimStates.bIsInAir = bInAir; }
-	void SetIsAttack ( const bool bAttack ) { m_playerAnimStates.bIsAttack = bAttack; }
-	void SetIsDead ( const bool bDead ) { m_playerAnimStates.bIsDead = bDead; }
-	void SetIsHit ( const bool bHit ) { m_playerAnimStates.bIsHit = bHit; }
-	void SetIsDash ( const bool bDash ) { m_playerAnimStates.bIsDash = bDash; }
-	void SetIsGuard ( const bool bGuard ) { m_playerAnimStates.bIsGuard = bGuard; }
-	void SetIsCrouch ( const bool bCrouch ) { m_playerAnimStates.bIsCrouch = bCrouch; }
-	void SetMovementState ( const EPlayerMovementState state ) { m_playerAnimStates.movementState = state; }
-	void SetCombatState ( const EPlayerCombatState state ) { m_playerAnimStates.combatState = state; }
+	void SetIsCrouch ( bool bCrouch ) { m_playerAnimStates.bIsCrouch = bCrouch; }
 
 protected:
 	UPROPERTY ( EditAnywhere , BlueprintReadWrite , Category = "NEKIRO|Animation" )
@@ -44,5 +62,7 @@ protected:
 	UPROPERTY(Transient)
 	TObjectPtr<class AK_Player> m_player;
 
+	UPROPERTY ( EditAnywhere , BlueprintReadWrite , Category = "NEKIRO|Animation" )
+	class UAnimMontage* attackMontage;
 
 };

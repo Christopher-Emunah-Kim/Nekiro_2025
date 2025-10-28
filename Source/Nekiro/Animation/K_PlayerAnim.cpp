@@ -34,6 +34,40 @@ void UK_PlayerAnim::UpdateAnimStates ( float DeltaSeconds )
 	CheckPlayerStates ();
 }
 
+void UK_PlayerAnim::EnterGuardState ()
+{
+	m_playerAnimStates.bIsGuard = true;
+	m_playerAnimStates.bIsAttack = false;
+	m_playerAnimStates.combatState = EPlayerCombatState::Guard;
+}
+
+void UK_PlayerAnim::ExitGuardState ()
+{
+	m_playerAnimStates.bIsGuard = false;
+	m_playerAnimStates.combatState = EPlayerCombatState::None;
+	m_playerAnimStates.movementState = EPlayerMovementState::IDLE;
+}
+
+void UK_PlayerAnim::EnterAttatkState ( int32 comboIndex )
+{
+	m_playerAnimStates.bIsAttack = true;
+	m_playerAnimStates.combatState = EPlayerCombatState::Attack;
+
+	if (attackMontage)
+	{
+		Montage_Play ( attackMontage , 1.f);
+		FName selectSection = FName ( "Attack1" );
+		Montage_JumpToSection ( selectSection , attackMontage );
+	}
+}
+
+void UK_PlayerAnim::ExitAttackState ()
+{
+	m_playerAnimStates.bIsAttack = false;
+	m_playerAnimStates.combatState = EPlayerCombatState::None;
+	m_playerAnimStates.movementState = EPlayerMovementState::IDLE;
+}
+
 void UK_PlayerAnim::CalculateSpeedAndDirection ( float DeltaSeconds )
 {
 	const UCharacterMovementComponent* moveComp = m_player->GetCharacterMovement ();

@@ -56,33 +56,36 @@ void AK_Player::BeginPlay()
 	Super::BeginPlay();
 	
 	AK_PlayerController* pc = Cast<AK_PlayerController> ( GetController () );
-	if (pc)
-	{
-		UEnhancedInputLocalPlayerSubsystem* subsys = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem> ( pc->GetLocalPlayer () );
-		if (subsys)
-		{
-			subsys->AddMappingContext ( IMC_Player , 0 );
-			UE_LOG ( LogTemp , Warning , TEXT ( "Input Mapping Context Added!" ) );
-		}
-		else
-		{
-			UE_LOG ( LogTemp , Warning , TEXT ( "No Enhanced Input Subsystem found!" ) );
-			return;
-		}
-	}
-	else
+	if (!pc)
 	{
 		UE_LOG ( LogTemp , Warning , TEXT ( "No Player Controller found!" ) );
 		return;
 	}
 
+	UEnhancedInputLocalPlayerSubsystem* subsys = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem> ( pc->GetLocalPlayer () );
+	if (!subsys)
+	{
+		UE_LOG ( LogTemp , Warning , TEXT ( "No Enhanced Input Subsystem found!" ) );
+		return;
+	}
+
+	subsys->AddMappingContext ( IMC_Player , 0 );
+	UE_LOG ( LogTemp , Warning , TEXT ( "Input Mapping Context Added!" ) );
+
 	playerAnim = Cast<UK_PlayerAnim>(meshComp->GetAnimInstance());
-	if(nullptr == playerAnim)
+	if(!playerAnim)
 	{
 		UE_LOG ( LogTemp , Warning , TEXT ( "No Player Anim Instance found!" ) );
 		return;
 	}
 	playerAnim->SetPlayerCharacter( *this );
+
+	
+	if(actionComp)
+	{
+		actionComp->OnGuardStateDel.AddDynamic ( this , &AK_Player::OnGuardStateChanged );
+		actionComp->OnAttackStateDel.AddDynamic ( this , &AK_Player::OnAttackStateChanged );
+	}
 
 }
 
@@ -119,28 +122,30 @@ void AK_Player::OnPlayerMove ( const FInputActionValue& value )
 	FVector2D inputVector = value.Get<FVector2D> ();
 
 	AK_PlayerController* pc = Cast<AK_PlayerController> ( GetController () );
-	if (pc)
+	if (!pc)
 	{
-		const FRotator controlRot = pc->GetControlRotation ();
-		const FRotator yawRot ( 0.f , controlRot.Yaw , 0.f );
-
-		const FVector forwardDir = FRotationMatrix ( yawRot ).GetUnitAxis ( EAxis::X );
-		const FVector rightDir = FRotationMatrix ( yawRot ).GetUnitAxis ( EAxis::Y );
-
-		AddMovementInput ( forwardDir , inputVector.Y );
-		AddMovementInput ( rightDir , inputVector.X );
+		return;
 	}
+
+	const FRotator controlRot = pc->GetControlRotation ();
+	const FRotator yawRot ( 0.f , controlRot.Yaw , 0.f );
+
+	const FVector forwardDir = FRotationMatrix ( yawRot ).GetUnitAxis ( EAxis::X );
+	const FVector rightDir = FRotationMatrix ( yawRot ).GetUnitAxis ( EAxis::Y );
+
+	AddMovementInput ( forwardDir , inputVector.Y );
+	AddMovementInput ( rightDir , inputVector.X );
 }
 
 void AK_Player::OnPlayerLook ( const FInputActionValue& value )
 {
-	FVector2D lookAxisVector = value.Get<FVector2D> ();
+	FVector2D inputVector = value.Get<FVector2D> ();
 
 	AK_PlayerController* pc = Cast<AK_PlayerController> ( GetController () );
 	if (pc)
 	{
-		AddControllerYawInput ( lookAxisVector.X * mouseSensitivity );
-		AddControllerPitchInput ( -lookAxisVector.Y * mouseSensitivity );
+		AddControllerYawInput ( inputVector.X * mouseSensitivity );
+		AddControllerPitchInput ( -inputVector.Y * mouseSensitivity );
 	}
 }
 
@@ -174,6 +179,10 @@ void AK_Player::OnPlayerCrouch ( const FInputActionValue& value )
 
 void AK_Player::OnPlayerAttack ()
 {
+	if(actionComp)
+	{
+		actionComp->PerformAttack ();
+	}	
 }
 
 void AK_Player::OnPlayerInteraction ()
@@ -186,29 +195,62 @@ void AK_Player::OnPlayerFinish ()
 
 void AK_Player::OnPlayerGuardStarted ()
 {
-	if (playerAnim)
+	if (actionComp)
 	{
-		//TODO : 이후 패링 체크 로직
-
-		playerAnim->SetIsGuard ( true );
-		UE_LOG ( LogTemp , Warning , TEXT ( "Guard Started" ) );
-
-		GetCharacterMovement ()->MaxWalkSpeed = movementDataAsset->crouchSpeed;
-		playerAnim->SetIsAttack ( false );
-		playerAnim->SetCombatState ( EPlayerCombatState::Guard );
+		actionComp->StartGuard ();
 	}
 }
 
 void AK_Player::OnPlayerGuardCompleted ()
 {
-	if(playerAnim)
+	if(actionComp)
 	{
-		playerAnim->SetIsGuard ( false );
-		UE_LOG ( LogTemp , Warning , TEXT ( "Guard Completed" ) );
+		actionComp->CompleteGuard ();
+	}
+}
 
-		GetCharacterMovement ()->MaxWalkSpeed = movementDataAsset->sprintSpeed;
-		playerAnim->SetCombatState ( EPlayerCombatState::None );
-		playerAnim->SetMovementState ( EPlayerMovementState::IDLE );
+void AK_Player::OnGuardStateChanged ( bool bIsGuarding )
+{
+	if (playerAnim)
+	{
+		if(bIsGuarding)
+		{
+			playerAnim->EnterGuardState();
+		}
+		else
+		{
+			playerAnim->ExitGuardState ();
+		}
+	}
+
+	if(movementDataAsset)
+	{
+		if(bIsGuarding)
+		{
+			GetCharacterMovement ()->MaxWalkSpeed = movementDataAsset->crouchSpeed;
+		}
+		else
+		{
+			GetCharacterMovement ()->MaxWalkSpeed = movementDataAsset->sprintSpeed;
+		}
+	}
+
+}
+
+void AK_Player::OnAttackStateChanged ( bool bIsAttacking , int32 ComboIndex )
+{
+	if (!playerAnim)
+	{
+		return;
+	}
+
+	if (bIsAttacking)
+	{
+		playerAnim->EnterAttatkState(ComboIndex);
+	}
+	else
+	{
+		playerAnim->ExitAttackState ();
 	}
 }
 

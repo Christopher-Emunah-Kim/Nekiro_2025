@@ -27,5 +27,14 @@ public:
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
-		
+
+	UFUNCTION ( BlueprintCallable , Category = "NEKIRO|Status" )
+	void TakeDamage ( float damageAmount );
+
+private:
+	UPROPERTY ( EditAnywhere , BlueprintReadOnly , Category = "NEKIRO|Status" , meta = (AllowPrivateAccess = "true" , ClampMin = "0.0" , ToolTip = "Max Health") )
+	float maxHealth = 100.0f;
+
+	UPROPERTY ( VisibleAnywhere , BlueprintReadOnly , Category = "NEKIRO|Status" , meta = (AllowPrivateAccess = "true" , ToolTip = "Current Health") )
+	float currentHealth = 100.0f;
 };

@@ -29,6 +29,10 @@ void UK_StatusComp::InitializeComponent ()
 	// ...
 }
 
+void UK_StatusComp::TakeDamage(float damageAmount)
+{
+}
+
 
 // Called every frame
 void UK_StatusComp::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
