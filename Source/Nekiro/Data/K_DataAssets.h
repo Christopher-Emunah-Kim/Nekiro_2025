@@ -65,6 +65,18 @@ class NEKIRO_API UK_MovementData : public UDataAsset
 	GENERATED_BODY ()
 
 public:
+	UPROPERTY ( EditAnywhere, BlueprintReadOnly, Category = "NEKIRO|Movement", meta = ( ClampMin = "0.0"))
+	float walkSpeed = 200.0f;
+
+	UPROPERTY ( EditAnywhere, BlueprintReadOnly, Category = "NEKIRO|Movement", meta = ( ClampMin = "0.0"))
+	float runSpeed = 400.0f;
+
+	UPROPERTY ( EditAnywhere, BlueprintReadOnly, Category = "NEKIRO|Movement", meta = ( ClampMin = "0.0"))
+	float crouchSpeed = 150.0f;
+
+	UPROPERTY ( EditAnywhere, BlueprintReadOnly, Category = "NEKIRO|Movement", meta = ( ClampMin = "0.0"))
+	float sprintSpeed = 600.0f;
+
 	UPROPERTY ( EditAnywhere, BlueprintReadOnly, Category = "NEKIRO|Movement", meta = ( ClampMin = "0.0", ToolTip = "Default Dash Distance"))
 	float dashDistance = 600.0f;
 

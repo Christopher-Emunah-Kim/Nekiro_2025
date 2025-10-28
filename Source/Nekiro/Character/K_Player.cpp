@@ -6,6 +6,7 @@
 
 #include <EnhancedInputSubsystems.h>
 #include <EnhancedInputComponent.h>
+#include <Kismet/KismetMathLibrary.h>
 
 #include "K_PlayerController.h"
 #include "Nekiro/Animation/K_PlayerAnim.h"
@@ -82,7 +83,7 @@ void AK_Player::BeginPlay()
 		return;
 	}
 	playerAnim->SetPlayerCharacter( *this );
-	UpdateAnimState ( 0.f );
+
 }
 
 // Called every frame
@@ -90,7 +91,6 @@ void AK_Player::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	UpdateAnimState ( DeltaTime );
 }
 
 // Called to bind functionality to input
@@ -101,19 +101,20 @@ void AK_Player::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 	UEnhancedInputComponent* inputComp = Cast<UEnhancedInputComponent> ( PlayerInputComponent );
 	if (inputComp)
 	{
-		inputComp->BindAction ( IA_Move , ETriggerEvent::Triggered , this , &AK_Player::PlayerMove );
-		inputComp->BindAction ( IA_Dash , ETriggerEvent::Started , this , &AK_Player::PlayerDash );
-		inputComp->BindAction ( IA_Look , ETriggerEvent::Triggered , this , &AK_Player::PlayerLook );
-		inputComp->BindAction ( IA_Jump , ETriggerEvent::Started , this , &AK_Player::PlayerJump );
-		inputComp->BindAction ( IA_Crouch , ETriggerEvent::Started , this , &AK_Player::PlayerCrouch );
-		inputComp->BindAction ( IA_Function , ETriggerEvent::Started , this , &AK_Player::PlayerInteraction );
-		inputComp->BindAction ( IA_Finish , ETriggerEvent::Started , this , &AK_Player::PlayerFinish );
-		inputComp->BindAction ( IA_Defense , ETriggerEvent::Started , this , &AK_Player::PlayerDefense );
-		inputComp->BindAction ( IA_Attack , ETriggerEvent::Started , this , &AK_Player::PlayerAttack );
+		inputComp->BindAction ( IA_Move , ETriggerEvent::Triggered , this , &AK_Player::OnPlayerMove );
+		inputComp->BindAction ( IA_Dash , ETriggerEvent::Started , this , &AK_Player::OnPlayerDash );
+		inputComp->BindAction ( IA_Look , ETriggerEvent::Triggered , this , &AK_Player::OnPlayerLook );
+		inputComp->BindAction ( IA_Jump , ETriggerEvent::Started , this , &AK_Player::OnPlayerJump );
+		inputComp->BindAction ( IA_Crouch , ETriggerEvent::Started , this , &AK_Player::OnPlayerCrouch );
+		inputComp->BindAction ( IA_Function , ETriggerEvent::Started , this , &AK_Player::OnPlayerInteraction );
+		inputComp->BindAction ( IA_Finish , ETriggerEvent::Started , this , &AK_Player::OnPlayerFinish );
+		inputComp->BindAction ( IA_Defense , ETriggerEvent::Started , this , &AK_Player::OnPlayerGuardStarted );
+		inputComp->BindAction ( IA_Defense , ETriggerEvent::Completed , this , &AK_Player::OnPlayerGuardCompleted );
+		inputComp->BindAction ( IA_Attack , ETriggerEvent::Started , this , &AK_Player::OnPlayerAttack );
 	}
 }
 
-void AK_Player::PlayerMove ( const FInputActionValue& value )
+void AK_Player::OnPlayerMove ( const FInputActionValue& value )
 {
 	FVector2D inputVector = value.Get<FVector2D> ();
 
@@ -129,11 +130,9 @@ void AK_Player::PlayerMove ( const FInputActionValue& value )
 		AddMovementInput ( forwardDir , inputVector.Y );
 		AddMovementInput ( rightDir , inputVector.X );
 	}
-
-	
 }
 
-void AK_Player::PlayerLook ( const FInputActionValue& value )
+void AK_Player::OnPlayerLook ( const FInputActionValue& value )
 {
 	FVector2D lookAxisVector = value.Get<FVector2D> ();
 
@@ -145,90 +144,72 @@ void AK_Player::PlayerLook ( const FInputActionValue& value )
 	}
 }
 
-void AK_Player::PlayerJump ()
+void AK_Player::OnPlayerJump ()
 {
 	Jump ();
 }
 
-void AK_Player::PlayerDash ( const FInputActionValue& value )
+void AK_Player::OnPlayerDash ( const FInputActionValue& value )
 {
 }
 
-void AK_Player::PlayerCrouch ( const FInputActionValue& value )
+void AK_Player::OnPlayerCrouch ( const FInputActionValue& value )
 {
-}
-
-void AK_Player::PlayerAttack ()
-{
-}
-
-void AK_Player::PlayerInteraction ()
-{
-}
-
-void AK_Player::PlayerFinish ()
-{
-}
-
-void AK_Player::PlayerDefense ()
-{
-}
-
-void AK_Player::UpdateAnimState ( float deltaTime )
-{
-	const FVector velocity = GetVelocity ();
-	const float speed = velocity.Size ();
-	playerAnimStates.speed = speed;
-
-	if(speed > 0)
+	if (bIsCrouched)
 	{
-		const FRotator rot = GetActorRotation ();
-		const FVector localVelocity = rot.UnrotateVector ( velocity );
-		playerAnimStates.direction = FMath::Atan2 ( localVelocity.Y , localVelocity.X ) * (180.f / PI);
+		UnCrouch ();
 	}
 	else
 	{
-		playerAnimStates.direction = 0.f;
+		Crouch ();
 	}
 
-	const UCharacterMovementComponent* moveComp = GetCharacterMovement ();
-	bool isInAir = false;
-	if(moveComp)
+	if (playerAnim)
 	{
-		isInAir = moveComp->IsFalling ();
-	}
-	else
-	{
-		isInAir = false;
-	}
-	playerAnimStates.bIsInAir = isInAir;
+		playerAnim->SetIsCrouch ( bIsCrouched );
 
-	if(isInAir)
-	{
-		playerAnimStates.movementState = EPlayerMovementState::JUMP;
-	}
-	else if(speed > 200.0f)
-	{
-		playerAnimStates.movementState = EPlayerMovementState::RUN;
-	}
-	else if(speed > 0.0f)
-	{
-		playerAnimStates.movementState = EPlayerMovementState::WALK;
-	}
-	else
-	{
-		playerAnimStates.movementState = EPlayerMovementState::IDLE;
-	}
-
-	const bool isAttacking = actionComp && actionComp->IsAttacking ();
-	playerAnimStates.bIsAttack = isAttacking;
-	if(isAttacking)
-	{
-		playerAnimStates.combatState = EPlayerCombatState::Attack;
-	}
-	else
-	{
-		playerAnimStates.combatState = EPlayerCombatState::None;
+		GetCharacterMovement ()->MaxWalkSpeed = movementDataAsset->crouchSpeed;
 	}
 }
+
+void AK_Player::OnPlayerAttack ()
+{
+}
+
+void AK_Player::OnPlayerInteraction ()
+{
+}
+
+void AK_Player::OnPlayerFinish ()
+{
+}
+
+void AK_Player::OnPlayerGuardStarted ()
+{
+	if (playerAnim)
+	{
+		//TODO : 이후 패링 체크 로직
+
+		playerAnim->SetIsGuard ( true );
+		UE_LOG ( LogTemp , Warning , TEXT ( "Guard Started" ) );
+
+		GetCharacterMovement ()->MaxWalkSpeed = movementDataAsset->crouchSpeed;
+		playerAnim->SetIsAttack ( false );
+		playerAnim->SetCombatState ( EPlayerCombatState::Guard );
+	}
+}
+
+void AK_Player::OnPlayerGuardCompleted ()
+{
+	if(playerAnim)
+	{
+		playerAnim->SetIsGuard ( false );
+		UE_LOG ( LogTemp , Warning , TEXT ( "Guard Completed" ) );
+
+		GetCharacterMovement ()->MaxWalkSpeed = movementDataAsset->sprintSpeed;
+		playerAnim->SetCombatState ( EPlayerCombatState::None );
+		playerAnim->SetMovementState ( EPlayerMovementState::IDLE );
+	}
+}
+
 

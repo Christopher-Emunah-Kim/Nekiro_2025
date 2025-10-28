@@ -37,17 +37,17 @@ public:
 
 
 
-	void PlayerMove ( const FInputActionValue& value );
-	void PlayerLook ( const FInputActionValue& value );
-	void PlayerDash ( const FInputActionValue& value );
-	void PlayerCrouch ( const FInputActionValue& value );
-	void PlayerJump ();
-	void PlayerAttack ();
-	void PlayerInteraction ();
-	void PlayerFinish ();
-	void PlayerDefense ();
+	void OnPlayerMove ( const FInputActionValue& value );
+	void OnPlayerLook ( const FInputActionValue& value );
+	void OnPlayerDash ( const FInputActionValue& value );
+	void OnPlayerCrouch ( const FInputActionValue& value );
+	void OnPlayerJump ();
+	void OnPlayerAttack ();
+	void OnPlayerInteraction ();
+	void OnPlayerFinish ();
+	void OnPlayerGuardStarted ();
+	void OnPlayerGuardCompleted ();
 
-	void UpdateAnimState ( float deltaTime );
 
 
 	UFUNCTION ( BlueprintPure , Category = "NEKIRO|Components" )
@@ -56,21 +56,14 @@ public:
 	UFUNCTION ( BlueprintPure , Category = "NEKIRO|Components" )
 	UK_ActionComp* GetActionComp () const { return actionComp; }
 
-	UFUNCTION ( BlueprintPure , Category = "NEKIRO|Animation" )
-	const FPlayerAnimStates& GetAnimState () const { return playerAnimStates; }
-
 
 private:
 	UPROPERTY ( VisibleAnywhere , BlueprintReadOnly , Category = "NEKIRO|Settings" , meta = (AllowPrivateAccess = "true") )
 	float mouseSensitivity = 0.3f;
 
-
 	//Animation
 	UPROPERTY ( VisibleAnywhere , BlueprintReadOnly , Category = "NEKIRO|Animation" , meta = (AllowPrivateAccess = "true") )
 	class UK_PlayerAnim* playerAnim;
-
-	UPROPERTY ( VisibleAnywhere , BlueprintReadOnly , Category = "NEKIRO|Animation" , meta = (AllowPrivateAccess = "true") )
-	FPlayerAnimStates playerAnimStates;
 
 	//Components
 	UPROPERTY ( VisibleAnywhere , BlueprintReadOnly , Category = "NEKIRO|Components" , meta = (AllowPrivateAccess = "true") )
