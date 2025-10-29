@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -13,5 +13,18 @@ UCLASS()
 class NEKIRO_API UK_BossAnim : public UAnimInstance
 {
 	GENERATED_BODY()
+
+public:
+	UK_BossAnim ();
+
+	virtual void NativeInitializeAnimation () override;
+	virtual void NativeUpdateAnimation ( float DeltaSeconds ) override;
+
+private:
+	TWeakObjectPtr<class AK_Boss> bossCharacter;
+
+protected:
+	UPROPERTY(BlueprintReadOnly, Category = "NEKIRO|BOSS|Animation")
+	float speed;
 	
 };

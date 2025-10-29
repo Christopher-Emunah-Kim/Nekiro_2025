@@ -24,8 +24,6 @@ enum class EPlayerCombatState : uint8
 	Guard UMETA ( DisplayName = "Guard" )
 };
 
-
-
 USTRUCT ( BlueprintType )
 struct NEKIRO_API FPlayerAnimStates
 {
