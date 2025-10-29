@@ -2,6 +2,9 @@
 
 
 #include "K_StatusComp.h"
+#include "NEKIRO/Character/K_Player.h"
+#include "NEKIRO/Animation/K_PlayerAnim.h"
+#include "NEKIRO/Data/K_DataAssets.h"
 
 // Sets default values for this component's properties
 UK_StatusComp::UK_StatusComp()
@@ -19,8 +22,7 @@ void UK_StatusComp::BeginPlay()
 {
 	Super::BeginPlay();
 
-	// ...
-	
+	currentHealth = statusData->PLAYER_MAX_HEALTH;
 }
 
 void UK_StatusComp::InitializeComponent ()

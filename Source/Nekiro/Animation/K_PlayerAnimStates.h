@@ -56,18 +56,4 @@ struct NEKIRO_API FPlayerAnimStates
 	UPROPERTY ( BlueprintReadOnly , Category = "NEKIRO|Animation" )
 	EPlayerCombatState combatState = EPlayerCombatState::None;
 
-
-
-	/*void SetSpeed ( const float spd ) { speed = spd; }
-	void SetDirection ( const float dir ) { direction = dir; }
-	void SetIsInAir ( const bool bInAir ) { bIsInAir = bInAir; }
-	void SetIsDead ( const bool bDead ) { bIsDead = bDead; }
-	void SetIsAttack ( const bool bAttack ) { bIsAttack = bAttack; }
-	void SetIsHit ( const bool bHit ) { bIsHit = bHit; }
-	void SetIsDash ( const bool bDash ) { bIsDash = bDash; }
-	void SetIsGuard ( const bool bGuard ) { bIsGuard = bGuard; }
-	void SetIsCrouch ( const bool bCrouch ) { bIsCrouch = bCrouch; }
-	void SetMovementState ( const EPlayerMovementState state ) { movementState = state; }
-	void SetCombatState ( const EPlayerCombatState state ) { combatState = state; }*/
-
 };

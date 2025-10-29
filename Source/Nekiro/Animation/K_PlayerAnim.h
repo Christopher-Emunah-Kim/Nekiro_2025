@@ -34,6 +34,11 @@ public:
 	void EnterAttatkState (int32 comboIndex);
 	void ExitAttackState ();
 
+	UFUNCTION()
+	void AnimNotify_AttackHitCheck ();
+	
+	UFUNCTION()
+	void AnimNotify_NextAttackCheck ();
 
 	/*UFUNCTION ()
 	void AnimNotify_DamageEnd ();
@@ -54,6 +59,7 @@ public:
 
 	void SetPlayerCharacter ( class AK_Player& player );
 	void SetIsCrouch ( bool bCrouch ) { m_playerAnimStates.bIsCrouch = bCrouch; }
+	bool GetIsCrouch () { return m_playerAnimStates.bIsCrouch; }
 
 protected:
 	UPROPERTY ( EditAnywhere , BlueprintReadWrite , Category = "NEKIRO|Animation" )

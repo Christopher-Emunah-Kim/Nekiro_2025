@@ -56,7 +56,7 @@ void UK_PlayerAnim::EnterAttatkState ( int32 comboIndex )
 	if (attackMontage)
 	{
 		Montage_Play ( attackMontage , 1.f);
-		FName selectSection = FName ( "Attack1" );
+		FName selectSection = FName ( "Attack3" );
 		Montage_JumpToSection ( selectSection , attackMontage );
 	}
 }
@@ -66,6 +66,14 @@ void UK_PlayerAnim::ExitAttackState ()
 	m_playerAnimStates.bIsAttack = false;
 	m_playerAnimStates.combatState = EPlayerCombatState::None;
 	m_playerAnimStates.movementState = EPlayerMovementState::IDLE;
+}
+
+void UK_PlayerAnim::AnimNotify_AttackHitCheck ()
+{
+}
+
+void UK_PlayerAnim::AnimNotify_NextAttackCheck ()
+{
 }
 
 void UK_PlayerAnim::CalculateSpeedAndDirection ( float DeltaSeconds )
@@ -111,7 +119,7 @@ void UK_PlayerAnim::CheckPlayerStates ()
 	if (moveComp)
 	{
 		m_playerAnimStates.bIsInAir = moveComp->IsFalling ();
-		m_playerAnimStates.bIsCrouch = moveComp->IsCrouching ();
+		//m_playerAnimStates.bIsCrouch = moveComp->IsCrouching ();
 	}
 	bool isInAir = m_playerAnimStates.bIsInAir;
 	if (isInAir)
@@ -131,7 +139,8 @@ void UK_PlayerAnim::CheckPlayerStates ()
 		m_playerAnimStates.movementState = EPlayerMovementState::IDLE;
 	}
 
-	if (moveComp && moveComp->IsCrouching ())
+	//if (moveComp && moveComp->IsCrouching ())
+	if (m_playerAnimStates.bIsCrouch)
 	{
 		m_playerAnimStates.movementState = EPlayerMovementState::CROUCH;
 	}

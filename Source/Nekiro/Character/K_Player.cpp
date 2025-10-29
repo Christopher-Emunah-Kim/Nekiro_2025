@@ -10,6 +10,7 @@
 
 #include "K_PlayerController.h"
 #include "Nekiro/Animation/K_PlayerAnim.h"
+#include "Nekiro/Data/K_DataAssets.h"
 
 // Sets default values
 AK_Player::AK_Player()
@@ -33,20 +34,19 @@ AK_Player::AK_Player()
 	bUseControllerRotationYaw = true;
 	GetCharacterMovement ()->bOrientRotationToMovement = false;
 
-	meshComp = GetMesh ();
 	static ConstructorHelpers::FObjectFinder<USkeletalMesh> tempMesh ( TEXT ( "/Script/Engine.SkeletalMesh'/Game/Assets/Character/ParagonKwang/Characters/Heroes/Kwang/Skins/Tier2/Kwang_Manban/Meshes/KwangManbun.KwangManbun'" ) );
 	if (tempMesh.Succeeded ())
 	{
-		meshComp->SetSkeletalMesh ( tempMesh.Object );
-		meshComp->SetRelativeLocation ( FVector ( 0.f , 0.f , -90.f ) );
-		meshComp->SetRelativeRotation ( FRotator ( 0.f , -90.f , 0.f ) );
-		meshComp->SetWorldScale3D ( FVector ( 0.9f , 0.9f , 0.9f ) );
+		GetMesh ()->SetSkeletalMesh ( tempMesh.Object );
+		GetMesh ()->SetRelativeLocation ( FVector ( 0.f , 0.f , -90.f ) );
+		GetMesh ()->SetRelativeRotation ( FRotator ( 0.f , -90.f , 0.f ) );
+		GetMesh ()->SetWorldScale3D ( FVector ( 0.9f , 0.9f , 0.9f ) );
 	}
 
 	static ConstructorHelpers::FClassFinder<UAnimInstance> tempABP ( TEXT ( "/Script/Engine.AnimBlueprint'/Game/Blueprints/ABP_Player.ABP_Player_C'" ) );
 	if (tempABP.Succeeded ())
 	{
-		meshComp->SetAnimInstanceClass ( tempABP.Class );
+		GetMesh ()->SetAnimInstanceClass ( tempABP.Class );
 	}
 }
 
@@ -55,6 +55,26 @@ void AK_Player::BeginPlay()
 {
 	Super::BeginPlay();
 	
+	PerformDefaultSettings (  );
+
+	//Bind Action Component Delegates
+	if(actionComp)
+	{
+		actionComp->OnGuardStateDel.AddDynamic ( this , &AK_Player::OnGuardStateChanged );
+		actionComp->OnAttackStateDel.AddDynamic ( this , &AK_Player::OnAttackStateChanged );
+	}
+
+	//Bind Status Component Delegates
+	if (statusComp)
+	{
+
+	}
+
+}
+
+void AK_Player::PerformDefaultSettings (  )
+{
+	//Input Mapping Context Setup
 	AK_PlayerController* pc = Cast<AK_PlayerController> ( GetController () );
 	if (!pc)
 	{
@@ -72,21 +92,14 @@ void AK_Player::BeginPlay()
 	subsys->AddMappingContext ( IMC_Player , 0 );
 	UE_LOG ( LogTemp , Warning , TEXT ( "Input Mapping Context Added!" ) );
 
-	playerAnim = Cast<UK_PlayerAnim>(meshComp->GetAnimInstance());
-	if(!playerAnim)
+	//Animation Instance Setup
+	playerAnim = Cast<UK_PlayerAnim> ( GetMesh ()->GetAnimInstance () );
+	if (!playerAnim)
 	{
 		UE_LOG ( LogTemp , Warning , TEXT ( "No Player Anim Instance found!" ) );
 		return;
 	}
-	playerAnim->SetPlayerCharacter( *this );
-
-	
-	if(actionComp)
-	{
-		actionComp->OnGuardStateDel.AddDynamic ( this , &AK_Player::OnGuardStateChanged );
-		actionComp->OnAttackStateDel.AddDynamic ( this , &AK_Player::OnAttackStateChanged );
-	}
-
+	playerAnim->SetPlayerCharacter ( *this );
 }
 
 // Called every frame
@@ -108,7 +121,8 @@ void AK_Player::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 		inputComp->BindAction ( IA_Dash , ETriggerEvent::Started , this , &AK_Player::OnPlayerDash );
 		inputComp->BindAction ( IA_Look , ETriggerEvent::Triggered , this , &AK_Player::OnPlayerLook );
 		inputComp->BindAction ( IA_Jump , ETriggerEvent::Started , this , &AK_Player::OnPlayerJump );
-		inputComp->BindAction ( IA_Crouch , ETriggerEvent::Started , this , &AK_Player::OnPlayerCrouch );
+		inputComp->BindAction ( IA_Crouch , ETriggerEvent::Started , this , &AK_Player::OnPlayerCrouchStarted );
+		inputComp->BindAction ( IA_Crouch , ETriggerEvent::Completed , this , &AK_Player::OnPlayerCrouchCompleted );
 		inputComp->BindAction ( IA_Function , ETriggerEvent::Started , this , &AK_Player::OnPlayerInteraction );
 		inputComp->BindAction ( IA_Finish , ETriggerEvent::Started , this , &AK_Player::OnPlayerFinish );
 		inputComp->BindAction ( IA_Defense , ETriggerEvent::Started , this , &AK_Player::OnPlayerGuardStarted );
@@ -158,22 +172,25 @@ void AK_Player::OnPlayerDash ( const FInputActionValue& value )
 {
 }
 
-void AK_Player::OnPlayerCrouch ( const FInputActionValue& value )
+void AK_Player::OnPlayerCrouchStarted ( const FInputActionValue& value )
 {
-	if (bIsCrouched)
+	//Crouch ();
+	GetCharacterMovement ()->MaxWalkSpeed = movementData->CROUCH_SPEED;
+	
+	if (playerAnim)
 	{
-		UnCrouch ();
+		playerAnim->SetIsCrouch ( true );
 	}
-	else
-	{
-		Crouch ();
-	}
+}
+
+void AK_Player::OnPlayerCrouchCompleted ( const FInputActionValue& value )
+{
+	//UnCrouch ();
+	GetCharacterMovement ()->MaxWalkSpeed = movementData->SPRINT_SPEED;
 
 	if (playerAnim)
 	{
-		playerAnim->SetIsCrouch ( bIsCrouched );
-
-		GetCharacterMovement ()->MaxWalkSpeed = movementDataAsset->crouchSpeed;
+		playerAnim->SetIsCrouch ( false );
 	}
 }
 
@@ -195,6 +212,11 @@ void AK_Player::OnPlayerFinish ()
 
 void AK_Player::OnPlayerGuardStarted ()
 {
+	if (playerAnim->GetIsCrouch ())
+	{
+		return;
+	}
+
 	if (actionComp)
 	{
 		actionComp->StartGuard ();
@@ -223,15 +245,15 @@ void AK_Player::OnGuardStateChanged ( bool bIsGuarding )
 		}
 	}
 
-	if(movementDataAsset)
+	if(movementData)
 	{
 		if(bIsGuarding)
 		{
-			GetCharacterMovement ()->MaxWalkSpeed = movementDataAsset->crouchSpeed;
+			GetCharacterMovement ()->MaxWalkSpeed = movementData->CROUCH_SPEED;
 		}
 		else
 		{
-			GetCharacterMovement ()->MaxWalkSpeed = movementDataAsset->sprintSpeed;
+			GetCharacterMovement ()->MaxWalkSpeed = movementData->SPRINT_SPEED;
 		}
 	}
 

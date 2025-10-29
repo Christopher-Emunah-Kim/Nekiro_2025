@@ -8,7 +8,6 @@
 
 #include "Nekiro/Components/K_StatusComp.h"
 #include "Nekiro/Components/K_ActionComp.h"
-#include "Nekiro/Data/K_DataAssets.h"
 #include "Nekiro/Animation/K_PlayerAnimStates.h"
 
 #include "K_Player.generated.h"
@@ -27,6 +26,7 @@ public:
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+	void PerformDefaultSettings ( );
 
 public:	
 	// Called every frame
@@ -40,7 +40,8 @@ public:
 	void OnPlayerMove ( const FInputActionValue& value );
 	void OnPlayerLook ( const FInputActionValue& value );
 	void OnPlayerDash ( const FInputActionValue& value );
-	void OnPlayerCrouch ( const FInputActionValue& value );
+	void OnPlayerCrouchStarted ( const FInputActionValue& value );
+	void OnPlayerCrouchCompleted ( const FInputActionValue& value );
 	void OnPlayerJump ();
 	void OnPlayerAttack ();
 	void OnPlayerInteraction ();
@@ -76,9 +77,6 @@ private:
 
 	UPROPERTY ( VisibleAnywhere , BlueprintReadOnly , Category = "NEKIRO|Components" , meta = (AllowPrivateAccess = "true") )
 	class UCameraComponent* cameraComp;
-
-	UPROPERTY ( VisibleAnywhere , BlueprintReadOnly , Category = "NEKIRO|Components" , meta = (AllowPrivateAccess = "true") )
-	class USkeletalMeshComponent* meshComp;
 
 	UPROPERTY ( VisibleAnywhere , BlueprintReadOnly , Category = "NEKIRO|Components" , meta = (AllowPrivateAccess = "true") )
 	class UK_StatusComp* statusComp;
@@ -118,19 +116,8 @@ private:
 	class UInputAction* IA_Attack;
 
 	//Data Assets
-	UPROPERTY ( EditDefaultsOnly , BlueprintReadOnly , Category = "NEKIRO|DataAssets" , meta = (AllowPrivateAccess = "true" , ToolTip = "Player Damage Data Asset") )
-	UK_DamageData* damageDataAsset;
-
-	UPROPERTY ( EditDefaultsOnly , BlueprintReadOnly , Category = "NEKIRO|DataAssets" , meta = (AllowPrivateAccess = "true" , ToolTip = "Player Combo Data Asset") )
-	UK_DamageData* comboDataAsset;
-
-	UPROPERTY ( EditDefaultsOnly , BlueprintReadOnly , Category = "NEKIRO|DataAssets" , meta = (AllowPrivateAccess = "true" , ToolTip = "Player Defense Data Asset") )
-	UK_DefenseData* defenseDataAsset;
 
 	UPROPERTY ( EditDefaultsOnly , BlueprintReadOnly , Category = "NEKIRO|DataAssets" , meta = (AllowPrivateAccess = "true" , ToolTip = "Player Movement Data Asset") )
-	UK_MovementData* movementDataAsset;
-
-	UPROPERTY ( EditDefaultsOnly , BlueprintReadOnly , Category = "NEKIRO|DataAssets" , meta = (AllowPrivateAccess = "true" , ToolTip = "Player Posture Data Asset") )
-	UK_PostureData* postureDataAsset;
+	class UK_MovementData* movementData;
 
 };

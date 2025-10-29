@@ -54,22 +54,16 @@ public:
 
 
 private:
-	UPROPERTY()
-	class AK_Player* ownerPlayer;
 
-	UPROPERTY()
-	class UK_PlayerAnim* playerAnim;
+	UPROPERTY ( EditDefaultsOnly , BlueprintReadOnly , Category = "NEKIRO|ActionComp|DataAssets" , meta = (AllowPrivateAccess = "true" , ToolTip = "Player Damage Data Asset") )
+	class UK_CombatData* combatData;
 
-	UPROPERTY ( EditDefaultsOnly , BlueprintReadOnly , Category = "NEKIRO|DataAssets" , meta = (AllowPrivateAccess = "true" , ToolTip = "Player Movement Data Asset") )
-	class UK_MovementData* movementDataAsset;
-	
-
-	UPROPERTY ( VisibleAnywhere ,BlueprintReadOnly, Category = "NEKIRO|Components" , meta = (AllowPrivateAccess = "true"))
+	UPROPERTY ( VisibleAnywhere ,BlueprintReadOnly, Category = "NEKIRO|ActionComp|Components" , meta = (AllowPrivateAccess = "true"))
 	bool bIsAttacking = false;
 
-	UPROPERTY ( VisibleAnywhere ,BlueprintReadOnly, Category = "NEKIRO|Components" , meta = (AllowPrivateAccess = "true"))
+	UPROPERTY ( VisibleAnywhere ,BlueprintReadOnly, Category = "NEKIRO|ActionComp|Components" , meta = (AllowPrivateAccess = "true"))
 	bool bIsGuarding = false;
 
-	UPROPERTY ( VisibleAnywhere , BlueprintReadOnly , Category = "NEKIRO|Components" , meta = (AllowPrivateAccess = "true") )
+	UPROPERTY ( VisibleAnywhere , BlueprintReadOnly , Category = "NEKIRO|ActionComp|Components" , meta = (AllowPrivateAccess = "true") )
 	int32 currentComboIndex = 0;
 };

@@ -13,7 +13,6 @@ UK_ActionComp::UK_ActionComp()
 	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = false;
 
-	ownerPlayer = Cast<AK_Player>(GetOwner());
 }
 
 
@@ -22,16 +21,6 @@ void UK_ActionComp::BeginPlay()
 {
 	Super::BeginPlay();
 
-	// ...
-	if (!ownerPlayer)
-	{
-		ownerPlayer = Cast<AK_Player> ( GetOwner () );
-	}
-
-	if (!playerAnim)
-	{
-		playerAnim = Cast<UK_PlayerAnim> ( ownerPlayer->GetMesh ()->GetAnimInstance () );
-	}
 }
 
 
@@ -46,12 +35,6 @@ void UK_ActionComp::TickComponent(float DeltaTime, ELevelTick TickType, FActorCo
 
 void UK_ActionComp::PerformAttack()
 {
-	if (!ownerPlayer)
-	{
-		UE_LOG ( LogTemp , Warning , TEXT ( "Owner Player is Nullptr" ) );
-		return;
-	}
-
 	if (bIsAttacking)
 	{
 		//콤보처리
@@ -70,12 +53,6 @@ void UK_ActionComp::PerformAttack()
 
 void UK_ActionComp::StartGuard()
 {
-	if (!ownerPlayer)
-	{
-		UE_LOG ( LogTemp , Warning , TEXT ( "Owner Player is Nullptr" ) );
-		return;
-	}
-
 	bIsGuarding = true;
 
 	OnGuardStateDel.Broadcast ( bIsGuarding );
@@ -86,12 +63,6 @@ void UK_ActionComp::StartGuard()
 
 void UK_ActionComp::CompleteGuard()
 {
-	if (!ownerPlayer)
-	{
-		UE_LOG ( LogTemp , Warning , TEXT ( "Owner Player is Nullptr" ) );
-		return;
-	}
-
 	bIsGuarding = false;
 
 	OnGuardStateDel.Broadcast ( bIsGuarding );

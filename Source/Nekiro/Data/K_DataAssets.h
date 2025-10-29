@@ -11,51 +11,42 @@
  * 
  */
 UCLASS(BlueprintType)
-class NEKIRO_API UK_DamageData : public UDataAsset
+class NEKIRO_API UK_CombatData : public UDataAsset
 {
 	GENERATED_BODY()
 
 public:
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "NEKIRO|Damage", meta=(ClampMin="0.0", ToolTip="Default Damage"))
-	float defaultAttackDamage = 25.0f;
+	//Player Damage
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "NEKIRO|Damage|Player", meta=(ClampMin="0.0", ToolTip="Default Damage"))
+	float DEFAULT_ATTACK_DAMAGE = 25.0f;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "NEKIRO|Damage", meta=(ClampMin="0.0", ToolTip="Power Damage"))
-	float powerAttackDamage = 45.0f;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "NEKIRO|Damage|Player", meta=(ClampMin="0.0", ToolTip="Power Damage"))
+	float STRONG_ATTACK_DAMAGE = 45.0f;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "NEKIRO|Damage", meta=(ClampMin="0.0", ToolTip="Critical Damage Multiplier"))
-	float criiticalDamageMultiplier = 1.5f;
-};
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "NEKIRO|Damage|Player", meta=(ClampMin="0.0", ToolTip="Critical Damage Multiplier"))
+	float CRITICAL_DAMAGE_MULTIPLIER = 1.5f;
+	
+	//Boss Damage
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "NEKIRO|Damage|Boss", meta=(ClampMin="0.0"))
+	float BOSS_DEFAULT_ATTACK_DAMAGE = 35.0f;
 
-
-UCLASS(BlueprintType)
-class NEKIRO_API UK_ComboData : public UDataAsset
-{
-	GENERATED_BODY()
-
-public:
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "NEKIRO|Combo", meta=(ClampMin="0.0", ToolTip="Combo Input Limitaion Time"))
-	float comboInputLimitTime = 0.45f;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "NEKIRO|Combo", meta=(ClampMin="0.0", ToolTip="Combo Reset Delay"))
-	float comboResetDelay = 1.25f;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "NEKIRO|Combo", meta=(ClampMin="0.0", ToolTip="Combo Lockout TIme"))
-	float comboLockoutTime = 0.2f; //마지막 콤보 후 추가입력 미허용 시간.
-};
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "NEKIRO|Damage|Boss", meta=(ClampMin="0.0"))
+	float BOSS_STRONG_ATTACK_DAMAGE = 60.0f;
 
 
-UCLASS ( BlueprintType )
-class NEKIRO_API UK_DefenseData : public UDataAsset
-{
-	GENERATED_BODY()
+	//Combo
+	UPROPERTY ( EditAnywhere , BlueprintReadOnly , Category = "NEKIRO|Combo" , meta = (ClampMin = "0.0" , ToolTip = "Combo Input Limitaion Time") )
+	float COMBO_INPUT_LIMIT_TIME = 0.45f;
 
-public:
-	UPROPERTY ( EditAnywhere, BlueprintReadOnly, Category = "NEKIRO|Defense", meta = ( ClampMin = "0.0", ToolTip = "Parry Success Time" ) )
-	float parrySuccessTime = 0.2f;
+	UPROPERTY ( EditAnywhere , BlueprintReadOnly , Category = "NEKIRO|Combo" , meta = (ClampMin = "0.0" , ToolTip = "Combo Reset Delay") )
+	float COMBO_RESET_DELAY = 1.25f;
 
-	UPROPERTY ( EditAnywhere, BlueprintReadOnly, Category = "NEKIRO|Defense", meta = ( ClampMin = "0.0", ToolTip = "Guard Damage Decrease Ratio"))
-	float guardDamageDecreaseRatio = 0.6f;
+	//Defense
+	UPROPERTY ( EditAnywhere , BlueprintReadOnly , Category = "NEKIRO|Defense" , meta = (ClampMin = "0.0" , ToolTip = "Parry Success Time") )
+	float PARRY_SUCCESS_TIME = 0.2f;
 
+	UPROPERTY ( EditAnywhere , BlueprintReadOnly , Category = "NEKIRO|Defense" , meta = (ClampMin = "0.0" , ToolTip = "Guard Damage Decrease Ratio") )
+	float GUARD_DAMAGE_REDUCTION_RATIO = 0.6f;
 };
 
 
@@ -65,45 +56,41 @@ class NEKIRO_API UK_MovementData : public UDataAsset
 	GENERATED_BODY ()
 
 public:
-	UPROPERTY ( EditAnywhere, BlueprintReadOnly, Category = "NEKIRO|Movement", meta = ( ClampMin = "0.0"))
-	float walkSpeed = 200.0f;
+	//Player Movement
+	UPROPERTY ( EditAnywhere, BlueprintReadOnly, Category = "NEKIRO|Movement|Player", meta = ( ClampMin = "0.0"))
+	float WALK_SPEED = 200.0f;
 
-	UPROPERTY ( EditAnywhere, BlueprintReadOnly, Category = "NEKIRO|Movement", meta = ( ClampMin = "0.0"))
-	float runSpeed = 400.0f;
+	UPROPERTY ( EditAnywhere, BlueprintReadOnly, Category = "NEKIRO|Movement|Player", meta = ( ClampMin = "0.0"))
+	float RUN_SPEED = 400.0f;
 
-	UPROPERTY ( EditAnywhere, BlueprintReadOnly, Category = "NEKIRO|Movement", meta = ( ClampMin = "0.0"))
-	float crouchSpeed = 150.0f;
+	UPROPERTY ( EditAnywhere, BlueprintReadOnly, Category = "NEKIRO|Movement|Player", meta = ( ClampMin = "0.0"))
+	float CROUCH_SPEED = 150.0f;
 
-	UPROPERTY ( EditAnywhere, BlueprintReadOnly, Category = "NEKIRO|Movement", meta = ( ClampMin = "0.0"))
-	float sprintSpeed = 600.0f;
+	UPROPERTY ( EditAnywhere, BlueprintReadOnly, Category = "NEKIRO|Movement|Player", meta = ( ClampMin = "0.0"))
+	float SPRINT_SPEED = 600.0f;
 
-	UPROPERTY ( EditAnywhere, BlueprintReadOnly, Category = "NEKIRO|Movement", meta = ( ClampMin = "0.0", ToolTip = "Default Dash Distance"))
-	float dashDistance = 600.0f;
+	//Boss Movement
+	UPROPERTY ( EditAnywhere, BlueprintReadOnly, Category = "NEKIRO|Movement|Boss", meta = ( ClampMin = "0.0"))
+	float BOSS_WALK_SPEED = 150.0f;
 
-	UPROPERTY ( EditAnywhere , BlueprintReadOnly , Category = "NEKIRO|Movement" , meta = (ClampMin = "0.0" , ToolTip = "Default Dash Cooldown Time") )
-	float dashCooldownTime = 1.0f;
-
-	UPROPERTY ( EditAnywhere , BlueprintReadOnly , Category = "NEKIRO|Movement" , meta = (ClampMin = "0.0" , ToolTip = "Roll Invincibility Time") )
-	float rollInvincibilityTime = 0.3f; 
-
-	UPROPERTY ( EditAnywhere , BlueprintReadOnly , Category = "NEKIRO|Movement" )
-	bool bIsDashing = false;
+	UPROPERTY ( EditAnywhere , BlueprintReadOnly , Category = "NEKIRO|Movement|Boss" , meta = (ClampMin = "0.0") )
+	float BOSS_RUN_SPEED = 300.0f;
 };
 
 
 UCLASS ( BlueprintType )
-class NEKIRO_API UK_PostureData : public UDataAsset
+class NEKIRO_API UK_StatusData : public UDataAsset
 {
 	GENERATED_BODY ()
 
 public:
-	UPROPERTY ( EditAnywhere , BlueprintReadOnly , Category = "NEKIRO|Posture" , meta = (ClampMin = "0.0" , ToolTip = "Max Posture Gauge") )
-	float maxPostureGauge = 100.0f;
+	UPROPERTY ( EditAnywhere , BlueprintReadOnly , Category = "NEKIRO|Status|Player" , meta = (ClampMin = "0.0") )
+	float PLAYER_MAX_HEALTH = 100.0f;
 
-	UPROPERTY ( EditAnywhere , BlueprintReadOnly , Category = "NEKIRO|Posture" , meta = (ClampMin = "0.0" , ToolTip = "Posture Recovery Rate") )
-	float postureRecoveryRate = 5.0f;
+	UPROPERTY ( EditAnywhere , BlueprintReadOnly , Category = "NEKIRO|Status|Player" , meta = (ClampMin = "0.0") )
+	float PLAYER_HEALTH_REGEN_RATE = 3.0f;
 
-	UPROPERTY ( EditAnywhere , BlueprintReadOnly , Category = "NEKIRO|Posture" , meta = (ClampMin = "0.0" , ToolTip = "Breaked Posture Rocovery Time") )
-	float breakedPostureRecoveryTime = 3.f;
+	UPROPERTY ( EditAnywhere , BlueprintReadOnly , Category = "NEKIRO|Status|Boss" , meta = (ClampMin = "0.0") )
+	float BOSS_MAX_HEALTH = 500.0f;
 
 };
