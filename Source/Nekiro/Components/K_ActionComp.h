@@ -53,7 +53,7 @@ public:
 	bool IsGuarding () const { return bIsGuarding; }
 
 
-private:
+protected:
 
 	UPROPERTY ( EditDefaultsOnly , BlueprintReadOnly , Category = "NEKIRO|ActionComp|DataAssets" , meta = (AllowPrivateAccess = "true" , ToolTip = "Player Damage Data Asset") )
 	class UK_CombatData* combatData;

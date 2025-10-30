@@ -10,7 +10,9 @@
  * 
  */
 
-class AK_BossCharacter;
+class AK_Boss;
+class UBehaviorTreeComponent;
+class UBlackboardComponent;
 
 UCLASS()
 class NEKIRO_API AK_BossAIController : public AAIController
@@ -24,7 +26,7 @@ protected:
 	virtual void OnPossess ( APawn* InPawn ) override;
 	virtual void OnUnPossess () override;
 
-	void InitializeBlackboardAndBehaviorTree ( AK_BossCharacter* boss );
+	void InitializeBehaviorTree ( AK_Boss* boss );
 
 public:
 	UFUNCTION ( BlueprintCallable , Category = "NEKIRO|BOSS|AI" )
@@ -35,10 +37,10 @@ public:
 
 protected:
 	UPROPERTY ( VisibleAnywhere , BlueprintReadOnly , Category = "NEKIRO|BOSS|AI" )
-	class UBehaviorTreeComponent* behaviorTreeComp;
+	UBehaviorTreeComponent* behaviorTreeComp;
 
 	UPROPERTY ( VisibleAnywhere , BlueprintReadOnly , Category = "NEKIRO|BOSS|AI" )
-	class UBlackboardComponent* blackboardComp;
+	UBlackboardComponent* blackboardComp;
 
 	UPROPERTY ( VisibleAnywhere , BlueprintReadOnly , Category = "NEKIRO|BOSS|AI" )
 	FName targetActorName;
