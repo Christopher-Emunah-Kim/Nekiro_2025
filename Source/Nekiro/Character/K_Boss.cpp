@@ -30,7 +30,7 @@ AK_Boss::AK_Boss()
 
 		bossMovementComp->bUseControllerDesiredRotation = true;
 		bossMovementComp->bOrientRotationToMovement = false;
-		bossMovementComp->MaxWalkSpeed = movementData->BOSS_WALK_SPEED;
+		bossMovementComp->MaxWalkSpeed = 150.f;
 		bossMovementComp->RotationRate = FRotator ( 0.f , 360.f , 0.f );
 	}
 

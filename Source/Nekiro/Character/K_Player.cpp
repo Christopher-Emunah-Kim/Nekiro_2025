@@ -7,10 +7,12 @@
 #include <EnhancedInputSubsystems.h>
 #include <EnhancedInputComponent.h>
 #include <Kismet/KismetMathLibrary.h>
+#include <Kismet/GameplayStatics.h>
 
 #include "K_PlayerController.h"
 #include "Nekiro/Animation/K_PlayerAnim.h"
 #include "Nekiro/Data/K_DataAssets.h"
+#include "K_Boss.h"
 
 // Sets default values
 AK_Player::AK_Player()
@@ -62,6 +64,7 @@ void AK_Player::BeginPlay()
 	{
 		actionComp->OnGuardStateDel.AddDynamic ( this , &AK_Player::OnGuardStateChanged );
 		actionComp->OnAttackStateDel.AddDynamic ( this , &AK_Player::OnAttackStateChanged );
+		actionComp->OnTargetLockOnDel.AddDynamic ( this , &AK_Player::OnLockOnStateChanged );
 	}
 
 	//Bind Status Component Delegates
@@ -128,6 +131,7 @@ void AK_Player::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 		inputComp->BindAction ( IA_Defense , ETriggerEvent::Started , this , &AK_Player::OnPlayerGuardStarted );
 		inputComp->BindAction ( IA_Defense , ETriggerEvent::Completed , this , &AK_Player::OnPlayerGuardCompleted );
 		inputComp->BindAction ( IA_Attack , ETriggerEvent::Started , this , &AK_Player::OnPlayerAttack );
+		inputComp->BindAction ( IA_LockOn , ETriggerEvent::Started , this , &AK_Player::OnPlayerLockOnOff );
 	}
 }
 
@@ -193,6 +197,24 @@ void AK_Player::OnPlayerCrouchCompleted ( const FInputActionValue& value )
 		playerAnim->SetIsCrouch ( false );
 	}
 }
+
+void AK_Player::OnPlayerLockOnOff ( const FInputActionValue& value )
+{
+	if(!actionComp)
+	{
+		return;
+	}
+
+	if(actionComp->IsLockOn())
+	{
+		actionComp->CompleteLockOn ();
+	}
+	else
+	{
+		actionComp->StartLockOn ();
+	}
+}
+
 
 void AK_Player::OnPlayerAttack ()
 {
@@ -273,6 +295,25 @@ void AK_Player::OnAttackStateChanged ( bool bIsAttacking , int32 ComboIndex )
 	else
 	{
 		playerAnim->ExitAttackState ();
+	}
+}
+
+void AK_Player::OnLockOnStateChanged ( bool bIsLockOnParam )
+{
+	if (bIsLockOnParam)
+	{
+		bUseControllerRotationYaw = false;
+		GetCharacterMovement ()->bOrientRotationToMovement = true;
+
+		UE_LOG ( LogTemp , Warning , TEXT ( "Player Lock-On Enabled" ) );
+	}
+	else
+	{
+		//카메라 세팅 복구
+		bUseControllerRotationYaw = true;
+		GetCharacterMovement ()->bOrientRotationToMovement = false;
+
+		UE_LOG ( LogTemp , Warning , TEXT ( "Player Lock-On Disabled" ) );
 	}
 }
 

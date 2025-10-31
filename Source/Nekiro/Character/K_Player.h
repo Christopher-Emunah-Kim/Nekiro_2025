@@ -35,13 +35,13 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
-
-
+	//Input Functions
 	void OnPlayerMove ( const FInputActionValue& value );
 	void OnPlayerLook ( const FInputActionValue& value );
 	void OnPlayerDash ( const FInputActionValue& value );
 	void OnPlayerCrouchStarted ( const FInputActionValue& value );
 	void OnPlayerCrouchCompleted ( const FInputActionValue& value );
+	void OnPlayerLockOnOff ( const FInputActionValue& value );
 	void OnPlayerJump ();
 	void OnPlayerAttack ();
 	void OnPlayerInteraction ();
@@ -49,13 +49,17 @@ public:
 	void OnPlayerGuardStarted ();
 	void OnPlayerGuardCompleted ();
 
+	//Delegate Functions
 	UFUNCTION()
 	void OnGuardStateChanged ( bool bIsGuarding );
 	UFUNCTION()
 	void OnAttackStateChanged ( bool bIsAttacking , int32 ComboIndex );
 
+	UFUNCTION()
+	void OnLockOnStateChanged ( bool bIsLockOnParam );
 
 
+	//Getters
 	UFUNCTION ( BlueprintPure , Category = "NEKIRO|Components" )
 	UK_StatusComp* GetStatusComp () const { return statusComp; }
 
@@ -66,6 +70,7 @@ public:
 private:
 	UPROPERTY ( VisibleAnywhere , BlueprintReadOnly , Category = "NEKIRO|Settings" , meta = (AllowPrivateAccess = "true") )
 	float mouseSensitivity = 0.3f;
+
 
 	//Animation
 	UPROPERTY ( VisibleAnywhere , BlueprintReadOnly , Category = "NEKIRO|Animation" , meta = (AllowPrivateAccess = "true") )
@@ -114,6 +119,9 @@ private:
 
 	UPROPERTY ( EditDefaultsOnly , BlueprintReadOnly , Category = "NEKIRO|Input" , meta = (AllowPrivateAccess = "true") )
 	class UInputAction* IA_Attack;
+
+	UPROPERTY ( EditDefaultsOnly , BlueprintReadOnly , Category = "NEKIRO|Input" , meta = (AllowPrivateAccess = "true") )
+	class UInputAction* IA_LockOn;
 
 	//Data Assets
 
