@@ -7,9 +7,10 @@
 
 #include "K_ActionComp.generated.h"
 
+class AK_Boss;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam( FOnGuardStateDelegate , bool , bIsGuarding );
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam( FOnLockOnDelegate , bool , bIsLockOn );
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams ( FOnLockOnStateDelegate , bool , bIsLockOn , AK_Boss* , TargetBoss );
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams ( FOnAttackStateDelegate , bool , bIsAttacking , int32 , ComboIndex );
 
 
@@ -29,7 +30,8 @@ public:
 
 	FOnAttackStateDelegate OnAttackStateDel;
 	FOnGuardStateDelegate OnGuardStateDel;
-	FOnLockOnDelegate OnTargetLockOnDel;
+	FOnLockOnStateDelegate OnLockOnStateDel;
+
 
 	UFUNCTION ( BlueprintCallable , Category = "NEKIRO|Action" )
 	void PerformAttack ();
@@ -45,6 +47,7 @@ public:
 
 	UFUNCTION ( BlueprintCallable , Category = "NEKIRO|Action" )
 	void CompleteLockOn ();
+
 
 	UFUNCTION ( BlueprintCallable , Category = "NEKIRO|Action" )
 	void SetAttackFlag ( bool bNewAttack ) { bIsAttacking = bNewAttack; }
@@ -64,12 +67,15 @@ public:
 	UFUNCTION ( BlueprintCallable , Category = "NEKIRO|Action" )
 	bool IsLockOn () const { return bIsLockOn; }
 
+	UFUNCTION ( BlueprintCallable , Category = "NEKIRO|Action" )
+	AK_Boss* GetTargetBoss () const { return targetBoss; }
+
 protected:
 	UPROPERTY ( VisibleAnywhere ,BlueprintReadOnly, Category = "NEKIRO|ActionComp|Components" )
 	class AK_Player* playerOwner;
 
 	UPROPERTY ( VisibleAnywhere ,BlueprintReadOnly, Category = "NEKIRO|ActionComp|Components" )
-	class AK_Boss* targetBoss;
+	AK_Boss* targetBoss;
 
 	UPROPERTY ( EditDefaultsOnly , BlueprintReadOnly , Category = "NEKIRO|ActionComp|DataAssets" , meta = (ToolTip = "Player Damage Data Asset") )
 	class UK_CombatData* combatData;

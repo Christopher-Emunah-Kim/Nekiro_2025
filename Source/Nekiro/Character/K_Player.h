@@ -12,7 +12,7 @@
 
 #include "K_Player.generated.h"
 
-
+class AK_Boss;
 
 UCLASS()
 class NEKIRO_API AK_Player : public ACharacter
@@ -42,12 +42,12 @@ public:
 	void OnPlayerCrouchStarted ( const FInputActionValue& value );
 	void OnPlayerCrouchCompleted ( const FInputActionValue& value );
 	void OnPlayerLockOnOff ( const FInputActionValue& value );
+	void OnPlayerAttack ( const FInputActionValue& value );
+	void OnPlayerGuardStarted ( const FInputActionValue& value );
+	void OnPlayerGuardCompleted ( const FInputActionValue& value );
 	void OnPlayerJump ();
-	void OnPlayerAttack ();
 	void OnPlayerInteraction ();
 	void OnPlayerFinish ();
-	void OnPlayerGuardStarted ();
-	void OnPlayerGuardCompleted ();
 
 	//Delegate Functions
 	UFUNCTION()
@@ -56,14 +56,16 @@ public:
 	void OnAttackStateChanged ( bool bIsAttacking , int32 ComboIndex );
 
 	UFUNCTION()
-	void OnLockOnStateChanged ( bool bIsLockOnParam );
+	void OnLockOnStateChanged ( bool bIsLockOnParam , AK_Boss* targetBoss );
 
+	UFUNCTION ( BlueprintNativeEvent , Category = "NEKIRO|Player|UI" )
+	void UpdateLockOnWBP ( bool bIsLockOn , AK_Boss* targetBoss );
 
 	//Getters
-	UFUNCTION ( BlueprintPure , Category = "NEKIRO|Components" )
+	UFUNCTION ( BlueprintCallable , Category = "NEKIRO|Components" )
 	UK_StatusComp* GetStatusComp () const { return statusComp; }
 
-	UFUNCTION ( BlueprintPure , Category = "NEKIRO|Components" )
+	UFUNCTION ( BlueprintCallable , Category = "NEKIRO|Components" )
 	UK_ActionComp* GetActionComp () const { return actionComp; }
 
 

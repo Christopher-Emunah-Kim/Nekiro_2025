@@ -64,7 +64,7 @@ void AK_Player::BeginPlay()
 	{
 		actionComp->OnGuardStateDel.AddDynamic ( this , &AK_Player::OnGuardStateChanged );
 		actionComp->OnAttackStateDel.AddDynamic ( this , &AK_Player::OnAttackStateChanged );
-		actionComp->OnTargetLockOnDel.AddDynamic ( this , &AK_Player::OnLockOnStateChanged );
+		actionComp->OnLockOnStateDel.AddDynamic ( this , &AK_Player::OnLockOnStateChanged );
 	}
 
 	//Bind Status Component Delegates
@@ -216,7 +216,7 @@ void AK_Player::OnPlayerLockOnOff ( const FInputActionValue& value )
 }
 
 
-void AK_Player::OnPlayerAttack ()
+void AK_Player::OnPlayerAttack ( const FInputActionValue& value )
 {
 	if(actionComp)
 	{
@@ -232,7 +232,7 @@ void AK_Player::OnPlayerFinish ()
 {
 }
 
-void AK_Player::OnPlayerGuardStarted ()
+void AK_Player::OnPlayerGuardStarted ( const FInputActionValue& value )
 {
 	if (playerAnim->GetIsCrouch ())
 	{
@@ -245,7 +245,7 @@ void AK_Player::OnPlayerGuardStarted ()
 	}
 }
 
-void AK_Player::OnPlayerGuardCompleted ()
+void AK_Player::OnPlayerGuardCompleted ( const FInputActionValue& value )
 {
 	if(actionComp)
 	{
@@ -298,7 +298,7 @@ void AK_Player::OnAttackStateChanged ( bool bIsAttacking , int32 ComboIndex )
 	}
 }
 
-void AK_Player::OnLockOnStateChanged ( bool bIsLockOnParam )
+void AK_Player::OnLockOnStateChanged ( bool bIsLockOnParam , AK_Boss* targetBoss )
 {
 	if (bIsLockOnParam)
 	{
@@ -315,6 +315,13 @@ void AK_Player::OnLockOnStateChanged ( bool bIsLockOnParam )
 
 		UE_LOG ( LogTemp , Warning , TEXT ( "Player Lock-On Disabled" ) );
 	}
+
+	UpdateLockOnWBP ( bIsLockOnParam , targetBoss );
+}
+
+void AK_Player::UpdateLockOnWBP_Implementation ( bool bIsLockOn , AK_Boss* targetBoss )
+{
+	//To be implemented in Blueprint
 }
 
 

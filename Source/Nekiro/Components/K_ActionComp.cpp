@@ -137,7 +137,7 @@ void UK_ActionComp::StartLockOn ()
 		start , end , 30.f , 
 		objectTypes , false , ignoreActors , 
 		EDrawDebugTrace::ForDuration , outHit , true,
-		FLinearColor::Red, FLinearColor::Green, 5.0f);
+		FLinearColor::Red, FLinearColor::Green, 2.0f);
 
 	if (bIsHit)
 	{
@@ -146,7 +146,7 @@ void UK_ActionComp::StartLockOn ()
 		{
 			targetBoss = lockOnTarget;
 			bIsLockOn = true;
-			OnTargetLockOnDel.Broadcast ( bIsLockOn );
+			OnLockOnStateDel.Broadcast ( true , targetBoss );
 
 			UE_LOG ( LogTemp , Warning , TEXT ( "Lock-On Target : %s" ) , *targetBoss->GetName () );
 			return;
@@ -164,7 +164,8 @@ void UK_ActionComp::StartLockOn ()
 	//락온 실패
 	{
 		bIsLockOn = false;
-		OnTargetLockOnDel.Broadcast ( bIsLockOn );
+		OnLockOnStateDel.Broadcast ( false , nullptr );
+
 		UE_LOG ( LogTemp , Warning , TEXT ( "Lock-On Failed" ) );
 		return;
 	}
@@ -179,7 +180,7 @@ void UK_ActionComp::CompleteLockOn ()
 
 	bIsLockOn = false;
 	targetBoss = nullptr;
-	OnTargetLockOnDel.Broadcast ( bIsLockOn );
+	OnLockOnStateDel.Broadcast ( false , nullptr );
 
 	UE_LOG ( LogTemp , Warning , TEXT ( "Lock-On Released" ) );
 }
