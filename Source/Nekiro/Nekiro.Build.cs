@@ -16,7 +16,8 @@ public class Nekiro : ModuleRules
 			"EnhancedInput",
 			"GameplayTags",
 			"GameplayAbilities",
-			"AIModule"
+			"AIModule",
+			"NavigationSystem"
 		});
 
 		PrivateDependencyModuleNames.AddRange(new string[] {  });

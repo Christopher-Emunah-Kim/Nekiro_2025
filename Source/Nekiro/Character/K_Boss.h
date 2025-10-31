@@ -58,12 +58,12 @@ public:
 	UFUNCTION ( BlueprintCallable , Category = "NEKIRO|Boss|AI" )
 	UK_ActionComp* GetActionComp () const { return actionComp; }
 
-private:
+protected:
 
-	UPROPERTY ( VisibleAnywhere , BlueprintReadOnly , Category = "NEKIRO|BT" , meta = (AllowPrivateAccess = "true") )
+	UPROPERTY ( EditDefaultsOnly , BlueprintReadOnly , Category = "NEKIRO|BT" , meta = (AllowPrivateAccess = "true") )
 	UBehaviorTree* bossBehaviorTree;
 
-	UPROPERTY ( VisibleAnywhere , BlueprintReadOnly , Category = "NEKIRO|BT" , meta = (AllowPrivateAccess = "true") )
+	UPROPERTY ( EditDefaultsOnly , BlueprintReadOnly , Category = "NEKIRO|BT" , meta = (AllowPrivateAccess = "true") )
 	UBlackboardData* bossBlackboardData;
 
 	UPROPERTY ( VisibleAnywhere , BlueprintReadOnly , Category = "NEKIRO|Animation" , meta = ( AllowPrivateAccess = "true" ) )

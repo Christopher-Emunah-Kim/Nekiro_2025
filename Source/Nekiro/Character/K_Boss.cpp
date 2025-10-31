@@ -4,6 +4,9 @@
 #include "K_Boss.h"
 #include "K_BossAIController.h"
 #include "NEKIRO/Animation/K_BossAnim.h"
+#include "NEKIRO/Components/K_ActionComp.h"
+#include "NEKIRO/Components/K_StatusComp.h"
+#include "NEKIRO/Data/K_DataAssets.h"
 
 #include "BehaviorTree/BehaviorTree.h"
 #include "BehaviorTree/BlackboardData.h"
@@ -22,10 +25,29 @@ AK_Boss::AK_Boss()
 	if(bossCapsuleComp && bossMovementComp)
 	{
 		bossCapsuleComp->InitCapsuleSize ( 55.f , 96.f );
+		bossCapsuleComp->SetRelativeLocation ( FVector ( 0.f , 0.f , 96.f ) );
+		bossCapsuleComp->SetCollisionResponseToChannel ( ECC_Camera , ECR_Ignore );
 
 		bossMovementComp->bUseControllerDesiredRotation = true;
 		bossMovementComp->bOrientRotationToMovement = false;
+		bossMovementComp->MaxWalkSpeed = movementData->BOSS_WALK_SPEED;
 		bossMovementComp->RotationRate = FRotator ( 0.f , 360.f , 0.f );
+	}
+
+	static ConstructorHelpers::FObjectFinder<USkeletalMesh> tempMesh ( TEXT ( "/Script/Engine.SkeletalMesh'/Game/Assets/Character/Assassin/Mesh/SK_Assassin.SK_Assassin'" ) );
+	if(tempMesh.Succeeded())
+	{
+		GetMesh ()->SetSkeletalMesh ( tempMesh.Object );
+		GetMesh ()->SetRelativeLocation ( FVector ( 0.f , 0.f , -96.f ) );
+		GetMesh ()->SetRelativeRotation ( FRotator ( 0.f , -90.f , 0.f ) );
+		GetMesh ()->SetWorldScale3D ( FVector ( 1.2f , 1.2f , 1.2f ) );
+		GetMesh ()->SetCollisionResponseToChannel ( ECC_Camera , ECR_Ignore );
+	}
+
+	static ConstructorHelpers::FClassFinder<UAnimInstance> tempABP ( TEXT ( "/Script/Engine.AnimBlueprint'/Game/Blueprints/Boss/ABP_Boss.ABP_Boss_C'" ) );
+	if (tempABP.Succeeded ())
+	{
+		GetMesh ()->SetAnimInstanceClass ( tempABP.Class );
 	}
 
 	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
