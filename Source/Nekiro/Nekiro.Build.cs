@@ -15,12 +15,15 @@ public class Nekiro : ModuleRules
 			"InputCore", 
 			"EnhancedInput",
 			"GameplayTags",
+			"GameplayTasks",
 			"GameplayAbilities",
 			"AIModule",
 			"NavigationSystem",
 			"Niagara",
 			"NiagaraCore",
 			"VectorVM",
+			"UMG",
+			"Slate",
 		});
 
 		PrivateDependencyModuleNames.AddRange(new string[] {  });

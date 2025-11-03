@@ -2,6 +2,7 @@
 
 
 #include "K_StatusComp.h"
+
 #include "../Character/K_Player.h"
 #include "../Character/K_Boss.h"
 #include "../Animation/K_PlayerAnim.h"
@@ -42,45 +43,32 @@ void UK_StatusComp::InitializeComponent ()
 	// ...
 }
 
-void UK_StatusComp::TakeDamage(float damageAmount)
+float UK_StatusComp::TakeDamage(float damageAmount)
 {
-	if (damageAmount <= 0.f)
+	if (damageAmount <= 0.f )
 	{
-		return;
+		return 0.f;
 	}
 
 	if (!statusData)
 	{
-		UE_LOG ( LogTemp , Warning , TEXT ( "StatusData is not assigned in StatusComp of %s" ) , *GetOwner ()->GetName () );
-		return;
+		UE_LOG ( LogTemp , Warning , TEXT ( "No Status Data found!" ) );
+		return 0.f;
 	}
 
-	currentHealth = FMath::Max ( currentHealth - damageAmount , 0.f );
-	UE_LOG ( LogTemp , Warning , TEXT ( "UK_StatusComp - %s 가 %f 데미지를 입었습니다. 현재 체력 : %f" ) , 
-		GetOwner () ? *GetOwner ()->GetName () : TEXT ( "Unknown" ) , damageAmount , currentHealth );
+	float newHealth = FMath::Max ( currentHealth - damageAmount , 0.f );
+	SetCurrentHealth ( newHealth );
 
-	if (FMath::IsNearlyZero(currentHealth))
+	UE_LOG ( LogTemp , Warning , TEXT ( "%s Took Damage: %f , Current Health: %f" ) , 
+		bIsPlayerOwner ? TEXT ( "Player" ) : TEXT ( "Boss" ), damageAmount , newHealth );
+
+	if (FMath::IsNearlyZero ( newHealth ))
 	{
-		UE_LOG ( LogTemp , Warning , TEXT ( "UK_StatusComp - %s 사망 처리 필요" ) , GetOwner () ? *GetOwner ()->GetName () : TEXT ( "Unknown" ) );
-
-		if(bIsPlayerOwner)
-		{
-			AK_Player* playerOwner = Cast<AK_Player> ( GetOwner () );
-			if (playerOwner)
-			{
-				//사망 델리게이트 처리
-			}
-		}
-		else
-		{
-			AK_Boss* bossOwner = Cast<AK_Boss> ( GetOwner () );
-			if (bossOwner)
-			{
-				//사망 델리게이트 처리
-			}
-		}
+		UE_LOG ( LogTemp , Warning , TEXT ( "%s Died!" ) , bIsPlayerOwner ? TEXT ( "Player" ) : TEXT ( "Boss" ) );
+		OnDeathDel.Broadcast ();
 	}
 
+	return damageAmount;
 }
 
 
@@ -90,5 +78,23 @@ void UK_StatusComp::TickComponent(float DeltaTime, ELevelTick TickType, FActorCo
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
 	// ...
+}
+
+float UK_StatusComp::GetMaxHealth() const
+{
+	if (!statusData)
+	{
+		UE_LOG ( LogTemp , Warning , TEXT ( "StatusData is not assigned in StatusComp of %s" ) , *GetOwner ()->GetName () );
+		return 100.f;
+	}
+
+	if(bIsPlayerOwner)
+	{
+		return statusData->PLAYER_MAX_HEALTH;
+	}
+	else 
+	{
+		return statusData->BOSS_MAX_HEALTH;
+	}
 }
 

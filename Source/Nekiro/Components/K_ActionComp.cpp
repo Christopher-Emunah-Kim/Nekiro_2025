@@ -173,23 +173,20 @@ void UK_ActionComp::HandleAttackHitCheck ()
 	{
 		AK_Boss* boss = Cast<AK_Boss> ( actor );
 
-		if (!boss)
-		{
-			continue;
-		}
-
-		if(hitActors.Contains(boss))
+		if (!boss || hitActors.Contains ( boss ))
 		{
 			continue;
 		}
 
 		hitActors.Add ( boss );
 
-		UK_StatusComp* bossStatus = boss->GetStatusComp ();
+		UGameplayStatics::ApplyDamage ( boss , damage , playerOwner->GetController () , playerOwner , nullptr );
+
+		/*UK_StatusComp* bossStatus = boss->GetStatusComp ();
 		if (bossStatus)
 		{
 			bossStatus->TakeDamage ( damage );
-		}
+		}*/
 
 		if (hitEffect)
 		{

@@ -4,6 +4,7 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Components/SphereComponent.h"
+#include "Components/CapsuleComponent.h"
 
 #include <EnhancedInputSubsystems.h>
 #include <EnhancedInputComponent.h>
@@ -56,17 +57,18 @@ AK_Player::AK_Player()
 	//TODO 에디터에서 소켓이름 지정
 	weaponCollisionComp = CreateDefaultSubobject<USphereComponent> ( TEXT ( "WeaponCollisionComp" ) );
 	weaponCollisionComp->SetupAttachment ( GetMesh () , weaponSocketName );
+	weaponCollisionComp->SetSphereRadius ( 50.f );
 }
 
 // Called when the game starts or when spawned
-void AK_Player::BeginPlay()
+void AK_Player::BeginPlay ()
 {
-	Super::BeginPlay();
-	
-	PerformDefaultSettings (  );
+	Super::BeginPlay ();
+
+	PerformDefaultSettings ();
 
 	//Bind Action Component Delegates
-	if(actionComp)
+	if (actionComp)
 	{
 		actionComp->OnGuardStateDel.AddDynamic ( this , &AK_Player::OnGuardStateChanged );
 		actionComp->OnAttackStateDel.AddDynamic ( this , &AK_Player::OnAttackStateChanged );
@@ -76,11 +78,11 @@ void AK_Player::BeginPlay()
 	//Bind Status Component Delegates
 	if (statusComp)
 	{
-
+		statusComp->OnDeathDel.AddDynamic ( this , &AK_Player::OnPlayerDeath );
 	}
 }
 
-void AK_Player::PerformDefaultSettings (  )
+void AK_Player::PerformDefaultSettings ()
 {
 	//Input Mapping Context Setup
 	AK_PlayerController* pc = Cast<AK_PlayerController> ( GetController () );
@@ -114,16 +116,16 @@ void AK_Player::PerformDefaultSettings (  )
 }
 
 // Called every frame
-void AK_Player::Tick(float DeltaTime)
+void AK_Player::Tick ( float DeltaTime )
 {
-	Super::Tick(DeltaTime);
+	Super::Tick ( DeltaTime );
 
 }
 
 // Called to bind functionality to input
-void AK_Player::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
+void AK_Player::SetupPlayerInputComponent ( UInputComponent* PlayerInputComponent )
 {
-	Super::SetupPlayerInputComponent(PlayerInputComponent);
+	Super::SetupPlayerInputComponent ( PlayerInputComponent );
 
 	UEnhancedInputComponent* inputComp = Cast<UEnhancedInputComponent> ( PlayerInputComponent );
 	if (inputComp)
@@ -141,6 +143,19 @@ void AK_Player::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 		inputComp->BindAction ( IA_Attack , ETriggerEvent::Started , this , &AK_Player::OnPlayerAttack );
 		inputComp->BindAction ( IA_LockOn , ETriggerEvent::Started , this , &AK_Player::OnPlayerLockOnOff );
 	}
+}
+
+float AK_Player::TakeDamage ( float DamageAmount , FDamageEvent const& DamageEvent , AController* EventInstigator , AActor* DamageCauser )
+{
+	Super::TakeDamage ( DamageAmount , DamageEvent , EventInstigator , DamageCauser );
+
+	if (!statusComp)
+	{
+		UE_LOG ( LogTemp , Warning , TEXT ( "No Status Component found!" ) );
+		return 0.f;
+	}
+
+	return statusComp->TakeDamage ( DamageAmount );
 }
 
 void AK_Player::OnPlayerMove ( const FInputActionValue& value )
@@ -352,3 +367,18 @@ void AK_Player::UpdateLockOnWBP_Implementation ( bool bIsLockOn , AK_Boss* targe
 }
 
 
+
+void AK_Player::OnPlayerDeath ()
+{
+	UE_LOG ( LogTemp , Warning , TEXT ( "Player Death Function Called" ) );
+
+	DisableInput ( Cast<APlayerController> ( GetController () ) );
+	GetCapsuleComponent()->SetCollisionEnabled (ECollisionEnabled::NoCollision);
+
+	if (playerAnim)
+	{
+		//playerAnim->PlayDeathMontage ();
+	}
+
+	//TODO : GameOver UI
+}

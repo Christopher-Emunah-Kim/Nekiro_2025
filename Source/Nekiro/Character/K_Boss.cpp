@@ -64,12 +64,12 @@ AK_Boss::AK_Boss()
 	AIControllerClass = AK_BossAIController::StaticClass ();
 
 	statusComp = CreateDefaultSubobject<UK_StatusComp> ( TEXT ( "StatusComp" ) );
-
+	
 	bossAnimStates.bIsAttack = false;
 	bossAnimStates.actionName = NAME_None;
 }
 
-// Called when the game starts or when spawned
+// Called when the game starts or when spawnedㄴ
 void AK_Boss::BeginPlay()
 {
 	Super::BeginPlay();
@@ -77,7 +77,12 @@ void AK_Boss::BeginPlay()
 	UCharacterMovementComponent* bossMovementComp = GetCharacterMovement ();
 	bossMovementComp->MaxWalkSpeed = movementData? movementData->BOSS_RUN_SPEED : 600.0f;
 
-	BindDelegateActions ();
+	if (statusComp)
+	{
+		statusComp->OnDeathDel.AddDynamic ( this , &AK_Boss::OnBossDeath );
+	}
+
+	BindAnimDelegateActions ();
 }
 
 void AK_Boss::OnBossStateChanged (FName actionName , bool bIsActive )
@@ -95,8 +100,9 @@ void AK_Boss::OnBossStateChanged (FName actionName , bool bIsActive )
 	}
 }
 
-void AK_Boss::BindDelegateActions ()
+void AK_Boss::BindAnimDelegateActions ()
 {
+
 	if (bossAnim)
 	{
 		return;
@@ -122,9 +128,22 @@ void AK_Boss::Tick(float DeltaTime)
 
 }
 
+float AK_Boss::TakeDamage ( float DamageAmount , FDamageEvent const& DamageEvent , AController* EventInstigator , AActor* DamageCauser )
+{
+	Super::TakeDamage ( DamageAmount , DamageEvent , EventInstigator , DamageCauser );
+
+	if (!statusComp)
+	{
+		UE_LOG ( LogTemp , Warning , TEXT ( "No Status Component found!" ) );
+		return 0.f;
+	}
+
+	return statusComp->TakeDamage ( DamageAmount );
+}
+
 void AK_Boss::ReqeustAttack(const FName& attackName)
 {
-	BindDelegateActions ();
+	BindAnimDelegateActions ();
 
 	if (!bossAnim)
 	{
@@ -136,7 +155,7 @@ void AK_Boss::ReqeustAttack(const FName& attackName)
 
 void AK_Boss::ReqeustSkill(const FName& skillName)
 {
-	BindDelegateActions ();
+	BindAnimDelegateActions ();
 	if(!bossAnim)
 	{
 		return;
@@ -145,3 +164,25 @@ void AK_Boss::ReqeustSkill(const FName& skillName)
 	//Request Skill
 }
 
+
+void AK_Boss::OnBossDeath ()
+{
+	UE_LOG ( LogTemp , Warning , TEXT ( "Boss Death Function Called!" ) );
+
+	AK_BossAIController* bossAIController = Cast<AK_BossAIController> ( GetController () );
+	if (bossAIController)
+	{
+		bossAIController->ClearTargetActor ();
+		bossAIController->StopMovement ();
+	}
+
+	GetCapsuleComponent ()->SetCollisionEnabled ( ECollisionEnabled::NoCollision );
+
+	//Anim
+	if (bossAnim)
+	{
+		//bossAnim->PlayBossDeathMontage ();
+	}
+
+	//TODO : Death Logic (Ragdoll , Destroy Actor after delay, Rewards, UI , etc)
+}

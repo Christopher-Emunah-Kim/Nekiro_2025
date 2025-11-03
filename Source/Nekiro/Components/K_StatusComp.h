@@ -7,6 +7,9 @@
 
 #include "K_StatusComp.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE ( FOnDeathStateDelegate );
+
+class UK_StatusData;
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class NEKIRO_API UK_StatusComp : public UActorComponent
@@ -27,14 +30,28 @@ public:
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
+	UPROPERTY ( BlueprintAssignable , Category = "NEKIRO|StatusComp|Delegates" )
+	FOnDeathStateDelegate OnDeathDel;
+
 
 	UFUNCTION ( BlueprintCallable , Category = "NEKIRO|StatusComp|Status" )
-	void TakeDamage ( float damageAmount );
+	float GetCurrentHealth () const { return currentHealth; }
+
+	UFUNCTION ( BlueprintCallable , Category = "NEKIRO|StatusComp|Status" )
+	float GetMaxHealth () const;
+
+	UFUNCTION ( BlueprintCallable , Category = "NEKIRO|StatusComp|Status" )
+	void SetCurrentHealth ( float newHealth ) { currentHealth = newHealth; }
+
+	UK_StatusData* GetStatusData () const { return statusData; }
+
+	UFUNCTION ( BlueprintCallable , Category = "NEKIRO|StatusComp|Status" )
+	float TakeDamage ( float damageAmount );
 
 private:
 
 	UPROPERTY ( EditDefaultsOnly , BlueprintReadOnly , Category = "NEKIRO|StatusComp|DataAssets" , meta = (AllowPrivateAccess = "true" , ToolTip = "Player Movement Data Asset") )
-	class UK_StatusData* statusData;
+	UK_StatusData* statusData;
 
 	UPROPERTY ( VisibleAnywhere , BlueprintReadOnly , Category = "NEKIRO|StatusComp|Status" , meta = (AllowPrivateAccess = "true" , ToolTip = "Current Health") )
 	float currentHealth;

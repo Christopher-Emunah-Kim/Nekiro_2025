@@ -21,20 +21,18 @@ class NEKIRO_API AK_Player : public ACharacter
 	GENERATED_BODY()
 
 public:
-	// Sets default values for this character's properties
 	AK_Player();
 
 protected:
-	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 	void PerformDefaultSettings ( );
 
 public:	
-	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+
+	virtual float TakeDamage ( float DamageAmount , struct FDamageEvent const& DamageEvent , class AController* EventInstigator , AActor* DamageCauser ) override;
 
 	//Input Functions
 	void OnPlayerMove ( const FInputActionValue& value );
@@ -50,11 +48,7 @@ public:
 	void OnPlayerInteraction ();
 	void OnPlayerFinish ();
 
-
 	void SetWeaponCollision ( bool bEnable );
-
-
-
 
 	//Delegate Functions
 	UFUNCTION()
@@ -67,6 +61,9 @@ public:
 
 	UFUNCTION ( BlueprintNativeEvent , Category = "NEKIRO|Player|UI" )
 	void UpdateLockOnWBP ( bool bIsLockOn , AK_Boss* targetBoss );
+
+	UFUNCTION ()
+	void OnPlayerDeath ();
 
 	//Getters
 	UFUNCTION ( BlueprintCallable , Category = "NEKIRO|Components" )

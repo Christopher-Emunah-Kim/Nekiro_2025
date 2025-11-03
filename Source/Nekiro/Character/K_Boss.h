@@ -22,23 +22,26 @@ class NEKIRO_API AK_Boss : public ACharacter
 	GENERATED_BODY()
 
 public:
-	// Sets default values for this character's properties
 	AK_Boss();
 
 protected:
-	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
 	UFUNCTION()
 	void OnBossStateChanged (FName actionName , bool bIsActive );
 
-	void BindDelegateActions ();
+	void BindAnimDelegateActions ();
 
-
+	UFUNCTION()
+	void OnBossDeath ();
 
 public:	
-	// Called every frame
 	virtual void Tick(float DeltaTime) override;
+
+	virtual float TakeDamage ( float DamageAmount , struct FDamageEvent const& DamageEvent , AController* EventInstigator , AActor* DamageCauser ) override;
+
+
+
 
 	UFUNCTION ( BlueprintCallable , Category = "NEKIRO|Boss|Combat" )
 	void ReqeustAttack ( const FName& attackName );
