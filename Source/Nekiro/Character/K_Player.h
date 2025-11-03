@@ -13,6 +13,7 @@
 #include "K_Player.generated.h"
 
 class AK_Boss;
+class USphereComponent;
 
 UCLASS()
 class NEKIRO_API AK_Player : public ACharacter
@@ -49,6 +50,12 @@ public:
 	void OnPlayerInteraction ();
 	void OnPlayerFinish ();
 
+
+	void SetWeaponCollision ( bool bEnable );
+
+
+
+
 	//Delegate Functions
 	UFUNCTION()
 	void OnGuardStateChanged ( bool bIsGuarding );
@@ -68,11 +75,17 @@ public:
 	UFUNCTION ( BlueprintCallable , Category = "NEKIRO|Components" )
 	UK_ActionComp* GetActionComp () const { return actionComp; }
 
+	USphereComponent* GetWeaponCollision () const { return weaponCollisionComp; }
+
 
 private:
 	UPROPERTY ( VisibleAnywhere , BlueprintReadOnly , Category = "NEKIRO|Settings" , meta = (AllowPrivateAccess = "true") )
 	float mouseSensitivity = 0.3f;
 
+	UPROPERTY ( VisibleAnywhere , BlueprintReadOnly , Category = "NEKIRO|Weapons" , meta = (AllowPrivateAccess = "true") )
+	USphereComponent* weaponCollisionComp;
+
+	FName weaponSocketName = "WeaponSocket";
 
 	//Animation
 	UPROPERTY ( VisibleAnywhere , BlueprintReadOnly , Category = "NEKIRO|Animation" , meta = (AllowPrivateAccess = "true") )

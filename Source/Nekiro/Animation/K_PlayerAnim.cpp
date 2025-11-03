@@ -10,6 +10,7 @@
 void UK_PlayerAnim::NativeInitializeAnimation ()
 {
 	m_player = Cast<AK_Player> ( TryGetPawnOwner () );
+	CheckComboAttackSections ();
 }
 
 void UK_PlayerAnim::NativeUpdateAnimation ( float DeltaSeconds )
@@ -24,6 +25,7 @@ void UK_PlayerAnim::NativeUpdateAnimation ( float DeltaSeconds )
 	}
 
 	UpdateAnimStates (DeltaSeconds);
+	CheckComboAttackSections ();
 
 }
 
@@ -53,12 +55,35 @@ void UK_PlayerAnim::EnterAttatkState ( int32 comboIndex )
 	m_playerAnimStates.bIsAttack = true;
 	m_playerAnimStates.combatState = EPlayerCombatState::Attack;
 
-	if (attackMontage)
+	if (!attackMontage)
 	{
-		Montage_Play ( attackMontage , 1.f);
-		FName selectSection = FName ( "Attack3" );
-		Montage_JumpToSection ( selectSection , attackMontage );
+		UE_LOG ( LogTemp , Warning , TEXT ( "AttackMontage is nullptr!" ) );
 	}
+
+	CheckComboAttackSections ();
+
+	const int32 maxIndex = attackSectionNames.Num () - 1;
+
+	const int32 validIndex = FMath::Clamp ( comboIndex , 0 , maxIndex );
+
+	FName selectSection = attackSectionNames.Num () > 0 ? attackSectionNames[validIndex] : FName ( "Attack3" );
+
+	if (Montage_IsPlaying ( attackMontage ))
+	{
+		Montage_JumpToSection ( selectSection , attackMontage );
+
+		UE_LOG ( LogTemp , Warning , TEXT ( "UK_PlayerAnim::EnterAttatkState - Jumped to Section: %s" ) , *selectSection.ToString () );
+	}
+	else
+	{
+		Montage_Play ( attackMontage , 1.f );
+		Montage_JumpToSection ( selectSection , attackMontage );
+		UE_LOG ( LogTemp , Warning , TEXT ( "UK_PlayerAnim::EnterAttatkState - Started and Jumped to Section: %s" ) , *selectSection.ToString () );
+	}
+
+	FOnMontageEnded endDel;
+	endDel.BindUObject ( this , &UK_PlayerAnim::OnAttackMontageEnded );
+	Montage_SetEndDelegate ( endDel , attackMontage );
 }
 
 void UK_PlayerAnim::ExitAttackState ()
@@ -68,13 +93,62 @@ void UK_PlayerAnim::ExitAttackState ()
 	m_playerAnimStates.movementState = EPlayerMovementState::IDLE;
 }
 
+void UK_PlayerAnim::OnAttackMontageEnded ( UAnimMontage* Montage , bool bInterrupted )
+{
+	UE_LOG ( LogTemp , Warning , TEXT ( "UK_PlayerAnim::OnAttackMontageEnded called. Interrupted: %s" ) , bInterrupted ? TEXT ( "True" ) : TEXT ( "False" ) );
+
+	if(Montage != attackMontage)
+	{
+		return;
+	}
+
+	if (bInterrupted)
+	{
+		UE_LOG ( LogTemp , Warning , TEXT ( "OnAttackMontageEnded - Montage was interrupted, not resetting" ) );
+
+		return;
+	}
+
+	UK_ActionComp* actionComp = m_player->GetActionComp ();
+	if (actionComp)
+	{
+		actionComp->HandleAttackFinished ( );
+	}
+}
+
 void UK_PlayerAnim::AnimNotify_AttackHitCheck ()
 {
+	UE_LOG ( LogTemp , Warning , TEXT ( "UK_PlayerAnim::AnimNotify_AttackHitCheck called." ) );
+
+	if(!m_player)
+	{
+		return;
+	}
+
+	UK_ActionComp* actionComp = m_player->GetActionComp ();
+	if (actionComp)
+	{
+		actionComp->HandleAttackHitCheck ();
+	}
+
 }
 
 void UK_PlayerAnim::AnimNotify_NextAttackCheck ()
 {
+	UE_LOG ( LogTemp , Warning , TEXT ( "UK_PlayerAnim::AnimNotify_NextAttackCheck called." ) );
+
+	if (!m_player)
+	{
+		return;
+	}
+
+	UK_ActionComp* actionComp = m_player->GetActionComp ();
+	if (actionComp)
+	{
+		actionComp->HandleNextAttackCheck ();
+	}
 }
+
 
 void UK_PlayerAnim::CalculateSpeedAndDirection ( float DeltaSeconds )
 {
@@ -159,6 +233,26 @@ void UK_PlayerAnim::CheckPlayerStates ()
 	else
 	{
 		m_playerAnimStates.combatState = EPlayerCombatState::None;
+	}
+}
+
+void UK_PlayerAnim::CheckComboAttackSections ()
+{
+	if (!attackMontage)
+	{
+		UE_LOG ( LogTemp , Warning , TEXT ( "AttackMontage is nullptr!" ) );
+		return;
+	}
+
+	attackSectionNames.Empty ();
+	const int32 numSections = attackMontage->GetNumSections ();
+	for ( int32 i = 0 ; i < numSections ; ++i )
+	{
+		FName sectionName = attackMontage->GetSectionName ( i );
+		if ( sectionName.ToString ().StartsWith ( "Attack" ) )
+		{
+			attackSectionNames.Add ( sectionName );
+		}
 	}
 }
 

@@ -3,6 +3,7 @@
 #include "Camera/CameraComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Components/SphereComponent.h"
 
 #include <EnhancedInputSubsystems.h>
 #include <EnhancedInputComponent.h>
@@ -50,6 +51,11 @@ AK_Player::AK_Player()
 	{
 		GetMesh ()->SetAnimInstanceClass ( tempABP.Class );
 	}
+
+	//Weapon Collision Setup
+	//TODO 에디터에서 소켓이름 지정
+	weaponCollisionComp = CreateDefaultSubobject<USphereComponent> ( TEXT ( "WeaponCollisionComp" ) );
+	weaponCollisionComp->SetupAttachment ( GetMesh () , weaponSocketName );
 }
 
 // Called when the game starts or when spawned
@@ -73,6 +79,7 @@ void AK_Player::BeginPlay()
 
 	}
 
+	SetWeaponCollision ( false );
 }
 
 void AK_Player::PerformDefaultSettings (  )
@@ -103,6 +110,9 @@ void AK_Player::PerformDefaultSettings (  )
 		return;
 	}
 	playerAnim->SetPlayerCharacter ( *this );
+
+	//Weapon Collision Setup
+	SetWeaponCollision ( false );
 }
 
 // Called every frame
@@ -230,6 +240,25 @@ void AK_Player::OnPlayerInteraction ()
 
 void AK_Player::OnPlayerFinish ()
 {
+}
+
+void AK_Player::SetWeaponCollision ( bool bEnable )
+{
+	if (!weaponCollisionComp)
+	{
+		return;
+	}
+
+	if (bEnable)
+	{
+		weaponCollisionComp->SetCollisionEnabled ( ECollisionEnabled::QueryAndPhysics );
+	}
+	else
+	{
+		weaponCollisionComp->SetCollisionEnabled ( ECollisionEnabled::NoCollision );
+	}
+
+	weaponCollisionComp->SetGenerateOverlapEvents ( bEnable );
 }
 
 void AK_Player::OnPlayerGuardStarted ( const FInputActionValue& value )

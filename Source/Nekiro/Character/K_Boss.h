@@ -4,7 +4,8 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
-#include "NEKIRO/Animation/K_BossAnimStates.h"
+
+#include "Nekiro/Animation/K_BossAnimStates.h"
 #include "K_Boss.generated.h"
 
 class UBehaviorTree;

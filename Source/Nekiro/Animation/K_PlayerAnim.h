@@ -21,6 +21,7 @@ class NEKIRO_API UK_PlayerAnim : public UAnimInstance
 private:
 	void CalculateSpeedAndDirection ( float DeltaSeconds );
 	void CheckPlayerStates ();
+	void CheckComboAttackSections ();
 
 public:
 	virtual void NativeInitializeAnimation () override;
@@ -34,16 +35,16 @@ public:
 	void EnterAttatkState (int32 comboIndex);
 	void ExitAttackState ();
 
+	void OnAttackMontageEnded ( UAnimMontage* Montage , bool bInterrupted );
+
 	UFUNCTION()
 	void AnimNotify_AttackHitCheck ();
 	
 	UFUNCTION()
 	void AnimNotify_NextAttackCheck ();
 
-	/*UFUNCTION ()
-	void AnimNotify_DamageEnd ();
-	UFUNCTION ()
-	void AnimNotify_DieEnd ();*/
+
+
 	//void UEnemyAnimInstance::AnimNotify_DamageEnd ()
 	//{
 	//	//몽타주 재생을 멈추고싶다.
@@ -70,5 +71,7 @@ protected:
 
 	UPROPERTY ( EditAnywhere , BlueprintReadWrite , Category = "NEKIRO|Animation" )
 	class UAnimMontage* attackMontage;
+
+	TArray<FName> attackSectionNames;
 
 };

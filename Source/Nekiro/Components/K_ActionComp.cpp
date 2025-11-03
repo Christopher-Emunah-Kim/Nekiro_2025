@@ -5,11 +5,18 @@
 #include "NEKIRO/Character/K_Player.h"
 #include "NEKIRO/Animation/K_PlayerAnim.h"
 #include "Nekiro/Character/K_Boss.h"
+#include "Nekiro/Components/K_StatusComp.h"
+#include "NEKIRO/Data/K_DataAssets.h"
+
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Components/SphereComponent.h"
+#include "NiagaraFunctionLibrary.h"
+#include "NiagaraSystem.h"
 
 #include <Kismet/KismetSystemLibrary.h>
 #include <Kismet/GameplayStatics.h>
 #include <Kismet/KismetMathLibrary.h>
+
 
 
 // Sets default values for this component's properties
@@ -67,17 +74,158 @@ void UK_ActionComp::TickComponent(float DeltaTime, ELevelTick TickType, FActorCo
 
 void UK_ActionComp::PerformAttack()
 {
+	if (!playerOwner)
+	{
+		playerOwner = Cast<AK_Player> ( GetOwner () );
+	}
+
 	if (bIsAttacking)
 	{
-		//콤보처리
-		currentComboIndex++;
-	}
-	else
-	{
-		currentComboIndex = 0;
+		if (bCanAcceptNextComboInput)
+		{
+			ProceedToNextCombo ();
+		}
+		else
+		{
+			bQueuedNextComboInput = true;
+
+			UWorld* world = GetWorld ();
+			if (world)
+			{
+				world->GetTimerManager ().ClearTimer ( comboInputTimerHandle );
+				const float inputLimitTime = combatData? combatData->COMBO_INPUT_LIMIT_TIME : 0.3f;
+				world->GetTimerManager ().SetTimer ( comboInputTimerHandle , this , &UK_ActionComp::ClearQueuedCombo , inputLimitTime , false );
+			}
+		}
+		return;
 	}
 
 	bIsAttacking = true;
+	bCanAcceptNextComboInput = false;
+	bQueuedNextComboInput = false;
+	currentComboIndex = 0;
+	hitActors.Empty ();
+
+	if (playerOwner)
+	{
+		playerOwner->SetWeaponCollision( false );
+	}
+
+	
+
+	OnAttackStateDel.Broadcast ( bIsAttacking , currentComboIndex );
+}
+
+void UK_ActionComp::HandleNextAttackCheck ()
+{
+	UE_LOG ( LogTemp , Warning , TEXT ( "HandleNextAttackCheck called! bIsAttacking: %d, bQueuedNextComboInput: %d" ) , bIsAttacking , bQueuedNextComboInput );
+
+	if(!bIsAttacking)
+	{
+		return;
+	}
+
+	bCanAcceptNextComboInput = true;
+
+	UWorld* world = GetWorld ();
+	if (world)
+	{
+		world->GetTimerManager ().ClearTimer ( comboResetTimerHandle );
+		const float resetDelay = combatData ? combatData->COMBO_RESET_DELAY : 0.3f;
+		world->GetTimerManager ().SetTimer ( comboResetTimerHandle , this , &UK_ActionComp::ResetCombo , resetDelay , false );
+	}
+
+	if (bQueuedNextComboInput)
+	{
+		UE_LOG ( LogTemp , Warning , TEXT ( "HandleNextAttackCheck - Processing queued input!" ) );
+		ProceedToNextCombo ();
+	}
+}
+
+void UK_ActionComp::HandleAttackHitCheck ()
+{
+	if (!bIsAttacking)
+	{
+		return;
+	}
+
+	if (!playerOwner)
+	{
+		playerOwner = Cast<AK_Player> ( GetOwner () );
+	}
+
+	USphereComponent* attackCollision = playerOwner->GetWeaponCollision ();
+	if(!attackCollision)
+	{
+		UE_LOG ( LogTemp , Warning , TEXT ( "Attack Collision is Null" ) );
+		return;
+	}
+
+	playerOwner->SetWeaponCollision ( true );
+	attackCollision->UpdateOverlaps ();
+
+	TArray<AActor*> overlappingActors;
+	attackCollision->GetOverlappingActors ( overlappingActors, AK_Boss::StaticClass());
+
+	const float damage = combatData ? combatData->DEFAULT_ATTACK_DAMAGE : 10.f;
+
+	for(AActor* actor : overlappingActors)
+	{
+		AK_Boss* boss = Cast<AK_Boss> ( actor );
+
+		if (!boss)
+		{
+			continue;
+		}
+
+		if(hitActors.Contains(boss))
+		{
+			continue;
+		}
+
+		hitActors.Add ( boss );
+
+		UK_StatusComp* bossStatus = boss->GetStatusComp ();
+		if (bossStatus)
+		{
+			bossStatus->TakeDamage ( damage );
+		}
+
+		if (hitEffect)
+		{
+			UNiagaraFunctionLibrary::SpawnSystemAtLocation ( GetWorld () , hitEffect ,
+				attackCollision->GetComponentLocation(),
+				attackCollision->GetComponentRotation());
+		}
+	}
+
+	playerOwner->SetWeaponCollision ( false );
+}
+
+void UK_ActionComp::HandleAttackFinished ()
+{
+	if (!bIsAttacking)
+	{
+		return;
+	}
+
+	bIsAttacking = false;
+	bCanAcceptNextComboInput = false;
+	bQueuedNextComboInput = false;
+	currentComboIndex = 0;
+	hitActors.Empty ();
+
+	if (playerOwner)
+	{
+		playerOwner->SetWeaponCollision ( false );
+	}
+
+	UWorld* world = GetWorld ();
+	if (world)
+	{
+		world->GetTimerManager ().ClearTimer ( comboInputTimerHandle );
+		world->GetTimerManager ().ClearTimer ( comboResetTimerHandle );
+	}
 
 	OnAttackStateDel.Broadcast ( bIsAttacking , currentComboIndex );
 }
@@ -183,4 +331,53 @@ void UK_ActionComp::CompleteLockOn ()
 	OnLockOnStateDel.Broadcast ( false , nullptr );
 
 	UE_LOG ( LogTemp , Warning , TEXT ( "Lock-On Released" ) );
+}
+
+void UK_ActionComp::ResetCombo ()
+{
+	HandleAttackFinished ();
+}
+
+void UK_ActionComp::ProceedToNextCombo ()
+{
+	UE_LOG ( LogTemp , Warning , TEXT ( "ProceedToNextCombo is Called!!!" ) );
+
+	if(!bIsAttacking)
+	{
+		return;
+	}
+
+	const int32 maxComboCount = attackSectionNames.Num () > 0 ? attackSectionNames.Num () : currentComboIndex + 1;
+
+	if(currentComboIndex  >= maxComboCount - 1) //safety check for last combo
+	{
+		UE_LOG ( LogTemp , Warning , TEXT ( "ProceedToNextCombo - Last combo reached, index: %d" ) , currentComboIndex );
+
+		bCanAcceptNextComboInput = false;
+		bQueuedNextComboInput = false;
+		return;
+	}
+
+	++currentComboIndex;
+	bCanAcceptNextComboInput = false;
+	bQueuedNextComboInput = false;
+	hitActors.Empty ();
+
+	UWorld* world = GetWorld ();
+	if(world)
+	{
+		world->GetTimerManager ().ClearTimer ( comboInputTimerHandle );
+		world->GetTimerManager ().ClearTimer ( comboResetTimerHandle );
+		//const float resetDelay = combatData? combatData->COMBO_RESET_DELAY : 0.3f;
+		//world->GetTimerManager ().SetTimer ( comboResetTimerHandle , this , &UK_ActionComp::ResetCombo , resetDelay , false );
+	}
+
+	UE_LOG ( LogTemp , Warning , TEXT ( "Proceeding to Combo Index : %d" ) , currentComboIndex );
+
+	OnAttackStateDel.Broadcast ( bIsAttacking , currentComboIndex );
+}
+
+void UK_ActionComp::ClearQueuedCombo ()
+{
+	bQueuedNextComboInput = false;
 }

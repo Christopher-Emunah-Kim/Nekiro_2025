@@ -39,4 +39,6 @@ private:
 	UPROPERTY ( VisibleAnywhere , BlueprintReadOnly , Category = "NEKIRO|StatusComp|Status" , meta = (AllowPrivateAccess = "true" , ToolTip = "Current Health") )
 	float currentHealth;
 
+	bool bIsPlayerOwner;
+
 };

@@ -4,10 +4,14 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "TimerManager.h"
 
 #include "K_ActionComp.generated.h"
 
 class AK_Boss;
+class AK_Player;
+class UNiagaraSystem;
+
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam( FOnGuardStateDelegate , bool , bIsGuarding );
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams ( FOnLockOnStateDelegate , bool , bIsLockOn , AK_Boss* , TargetBoss );
@@ -35,6 +39,15 @@ public:
 
 	UFUNCTION ( BlueprintCallable , Category = "NEKIRO|Action" )
 	void PerformAttack ();
+
+	UFUNCTION ( BlueprintCallable , Category = "NEKIRO|Action" )
+	void HandleNextAttackCheck ();
+
+	UFUNCTION ( BlueprintCallable , Category = "NEKIRO|Action" )
+	void HandleAttackHitCheck ();
+
+	UFUNCTION ( BlueprintCallable , Category = "NEKIRO|Action" )
+	void HandleAttackFinished ();
 
 	UFUNCTION ( BlueprintCallable , Category = "NEKIRO|Action" )
 	void StartGuard ();
@@ -70,9 +83,14 @@ public:
 	UFUNCTION ( BlueprintCallable , Category = "NEKIRO|Action" )
 	AK_Boss* GetTargetBoss () const { return targetBoss; }
 
+private:
+	void ResetCombo ();
+	void ProceedToNextCombo ();
+	void ClearQueuedCombo ();
+
 protected:
 	UPROPERTY ( VisibleAnywhere ,BlueprintReadOnly, Category = "NEKIRO|ActionComp|Components" )
-	class AK_Player* playerOwner;
+	AK_Player* playerOwner;
 
 	UPROPERTY ( VisibleAnywhere ,BlueprintReadOnly, Category = "NEKIRO|ActionComp|Components" )
 	AK_Boss* targetBoss;
@@ -81,14 +99,32 @@ protected:
 	class UK_CombatData* combatData;
 
 	UPROPERTY ( VisibleAnywhere ,BlueprintReadOnly, Category = "NEKIRO|ActionComp|Components" )
-	bool bIsAttacking = false;
-
-	UPROPERTY ( VisibleAnywhere ,BlueprintReadOnly, Category = "NEKIRO|ActionComp|Components" )
 	bool bIsGuarding = false;
 
 	UPROPERTY ( VisibleAnywhere ,BlueprintReadOnly, Category = "NEKIRO|ActionComp|Components" )
 	bool bIsLockOn = false;
 
-	UPROPERTY ( VisibleAnywhere , BlueprintReadOnly , Category = "NEKIRO|ActionComp|Components" )
+	////Combo Attack
+	UPROPERTY ( VisibleAnywhere , BlueprintReadOnly , Category = "NEKIRO|ActionComp|Attack" )
+	bool bIsAttacking = false;
+
+	UPROPERTY ( VisibleAnywhere , BlueprintReadOnly , Category = "NEKIRO|ActionComp|Attack" )
+	TArray<FName> attackSectionNames = { "Attack1" , "Attack2" , "Attack3" };
+
+	UPROPERTY ( VisibleAnywhere , BlueprintReadOnly , Category = "NEKIRO|ActionComp|Attack" )
+	UNiagaraSystem* hitEffect = nullptr;
+
+	UPROPERTY ( VisibleAnywhere , BlueprintReadOnly , Category = "NEKIRO|ActionComp|Attack" )
 	int32 currentComboIndex = 0;
+
+	bool bCanAcceptNextComboInput = false;
+	bool bQueuedNextComboInput = false;
+
+	FTimerHandle comboResetTimerHandle;
+	FTimerHandle comboInputTimerHandle;
+	TSet<TWeakObjectPtr<AActor>> hitActors;
+
+
+
+
 };

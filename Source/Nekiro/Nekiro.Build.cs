@@ -17,7 +17,10 @@ public class Nekiro : ModuleRules
 			"GameplayTags",
 			"GameplayAbilities",
 			"AIModule",
-			"NavigationSystem"
+			"NavigationSystem",
+			"Niagara",
+			"NiagaraCore",
+			"VectorVM",
 		});
 
 		PrivateDependencyModuleNames.AddRange(new string[] {  });
