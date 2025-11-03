@@ -78,8 +78,6 @@ void AK_Player::BeginPlay()
 	{
 
 	}
-
-	SetWeaponCollision ( false );
 }
 
 void AK_Player::PerformDefaultSettings (  )
@@ -100,7 +98,7 @@ void AK_Player::PerformDefaultSettings (  )
 	}
 
 	subsys->AddMappingContext ( IMC_Player , 0 );
-	UE_LOG ( LogTemp , Warning , TEXT ( "Input Mapping Context Added!" ) );
+	//UE_LOG ( LogTemp , Warning , TEXT ( "Input Mapping Context Added!" ) );
 
 	//Animation Instance Setup
 	playerAnim = Cast<UK_PlayerAnim> ( GetMesh ()->GetAnimInstance () );

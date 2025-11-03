@@ -71,7 +71,6 @@ void UK_PlayerAnim::EnterAttatkState ( int32 comboIndex )
 	if (Montage_IsPlaying ( attackMontage ))
 	{
 		Montage_JumpToSection ( selectSection , attackMontage );
-
 		UE_LOG ( LogTemp , Warning , TEXT ( "UK_PlayerAnim::EnterAttatkState - Jumped to Section: %s" ) , *selectSection.ToString () );
 	}
 	else
@@ -95,8 +94,7 @@ void UK_PlayerAnim::ExitAttackState ()
 
 void UK_PlayerAnim::OnAttackMontageEnded ( UAnimMontage* Montage , bool bInterrupted )
 {
-	UE_LOG ( LogTemp , Warning , TEXT ( "UK_PlayerAnim::OnAttackMontageEnded called. Interrupted: %s" ) , bInterrupted ? TEXT ( "True" ) : TEXT ( "False" ) );
-
+	//UE_LOG ( LogTemp , Warning , TEXT ( "UK_PlayerAnim::OnAttackMontageEnded called. Interrupted: %s" ) , bInterrupted ? TEXT ( "True" ) : TEXT ( "False" ) );
 	if(Montage != attackMontage)
 	{
 		return;
@@ -118,7 +116,7 @@ void UK_PlayerAnim::OnAttackMontageEnded ( UAnimMontage* Montage , bool bInterru
 
 void UK_PlayerAnim::AnimNotify_AttackHitCheck ()
 {
-	UE_LOG ( LogTemp , Warning , TEXT ( "UK_PlayerAnim::AnimNotify_AttackHitCheck called." ) );
+	//UE_LOG ( LogTemp , Warning , TEXT ( "UK_PlayerAnim::AnimNotify_AttackHitCheck called." ) );
 
 	if(!m_player)
 	{
@@ -135,7 +133,7 @@ void UK_PlayerAnim::AnimNotify_AttackHitCheck ()
 
 void UK_PlayerAnim::AnimNotify_NextAttackCheck ()
 {
-	UE_LOG ( LogTemp , Warning , TEXT ( "UK_PlayerAnim::AnimNotify_NextAttackCheck called." ) );
+	//UE_LOG ( LogTemp , Warning , TEXT ( "UK_PlayerAnim::AnimNotify_NextAttackCheck called." ) );
 
 	if (!m_player)
 	{

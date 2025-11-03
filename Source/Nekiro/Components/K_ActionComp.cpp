@@ -118,7 +118,7 @@ void UK_ActionComp::PerformAttack()
 
 void UK_ActionComp::HandleNextAttackCheck ()
 {
-	UE_LOG ( LogTemp , Warning , TEXT ( "HandleNextAttackCheck called! bIsAttacking: %d, bQueuedNextComboInput: %d" ) , bIsAttacking , bQueuedNextComboInput );
+	//UE_LOG ( LogTemp , Warning , TEXT ( "HandleNextAttackCheck called! bIsAttacking: %d, bQueuedNextComboInput: %d" ) , bIsAttacking , bQueuedNextComboInput );
 
 	if(!bIsAttacking)
 	{
@@ -137,7 +137,7 @@ void UK_ActionComp::HandleNextAttackCheck ()
 
 	if (bQueuedNextComboInput)
 	{
-		UE_LOG ( LogTemp , Warning , TEXT ( "HandleNextAttackCheck - Processing queued input!" ) );
+		//UE_LOG ( LogTemp , Warning , TEXT ( "HandleNextAttackCheck - Processing queued input!" ) );
 		ProceedToNextCombo ();
 	}
 }
@@ -276,7 +276,6 @@ void UK_ActionComp::StartLockOn ()
 
 	TArray<TEnumAsByte<EObjectTypeQuery>> objectTypes;
 	objectTypes.Add ( EObjectTypeQuery::ObjectTypeQuery3 ); //Pawn Object Type
-	//objectTypes.Add ( EObjectTypeQuery::ObjectTypeQuery1 ); //CharacterObjectType
 	TArray<AActor*> ignoreActors;
 	ignoreActors.Add ( player );
 
@@ -301,12 +300,12 @@ void UK_ActionComp::StartLockOn ()
 		}
 		else
 		{
-			UE_LOG ( LogTemp , Warning , TEXT ( "Lock-On Target is not Boss Type" ) );
+			//UE_LOG ( LogTemp , Warning , TEXT ( "Lock-On Target is not Boss Type" ) );
 		}
 	}
 	else
 	{
-		UE_LOG ( LogTemp , Warning , TEXT ( "No Lock-On Hit Detected" ) );
+		//UE_LOG ( LogTemp , Warning , TEXT ( "No Lock-On Hit Detected" ) );
 	}
 
 	//락온 실패
@@ -314,7 +313,7 @@ void UK_ActionComp::StartLockOn ()
 		bIsLockOn = false;
 		OnLockOnStateDel.Broadcast ( false , nullptr );
 
-		UE_LOG ( LogTemp , Warning , TEXT ( "Lock-On Failed" ) );
+		//UE_LOG ( LogTemp , Warning , TEXT ( "Lock-On Failed" ) );
 		return;
 	}
 }
@@ -330,7 +329,7 @@ void UK_ActionComp::CompleteLockOn ()
 	targetBoss = nullptr;
 	OnLockOnStateDel.Broadcast ( false , nullptr );
 
-	UE_LOG ( LogTemp , Warning , TEXT ( "Lock-On Released" ) );
+	//UE_LOG ( LogTemp , Warning , TEXT ( "Lock-On Released" ) );
 }
 
 void UK_ActionComp::ResetCombo ()
@@ -340,7 +339,7 @@ void UK_ActionComp::ResetCombo ()
 
 void UK_ActionComp::ProceedToNextCombo ()
 {
-	UE_LOG ( LogTemp , Warning , TEXT ( "ProceedToNextCombo is Called!!!" ) );
+	//UE_LOG ( LogTemp , Warning , TEXT ( "ProceedToNextCombo is Called!!!" ) );
 
 	if(!bIsAttacking)
 	{
@@ -351,7 +350,7 @@ void UK_ActionComp::ProceedToNextCombo ()
 
 	if(currentComboIndex  >= maxComboCount - 1) //safety check for last combo
 	{
-		UE_LOG ( LogTemp , Warning , TEXT ( "ProceedToNextCombo - Last combo reached, index: %d" ) , currentComboIndex );
+		//UE_LOG ( LogTemp , Warning , TEXT ( "ProceedToNextCombo - Last combo reached, index: %d" ) , currentComboIndex );
 
 		bCanAcceptNextComboInput = false;
 		bQueuedNextComboInput = false;
@@ -368,8 +367,6 @@ void UK_ActionComp::ProceedToNextCombo ()
 	{
 		world->GetTimerManager ().ClearTimer ( comboInputTimerHandle );
 		world->GetTimerManager ().ClearTimer ( comboResetTimerHandle );
-		//const float resetDelay = combatData? combatData->COMBO_RESET_DELAY : 0.3f;
-		//world->GetTimerManager ().SetTimer ( comboResetTimerHandle , this , &UK_ActionComp::ResetCombo , resetDelay , false );
 	}
 
 	UE_LOG ( LogTemp , Warning , TEXT ( "Proceeding to Combo Index : %d" ) , currentComboIndex );

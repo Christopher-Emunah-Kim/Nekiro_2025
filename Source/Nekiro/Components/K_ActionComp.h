@@ -111,7 +111,7 @@ protected:
 	UPROPERTY ( VisibleAnywhere , BlueprintReadOnly , Category = "NEKIRO|ActionComp|Attack" )
 	TArray<FName> attackSectionNames = { "Attack1" , "Attack2" , "Attack3" };
 
-	UPROPERTY ( VisibleAnywhere , BlueprintReadOnly , Category = "NEKIRO|ActionComp|Attack" )
+	UPROPERTY ( EditDefaultsOnly , BlueprintReadOnly , Category = "NEKIRO|ActionComp|Attack" )
 	UNiagaraSystem* hitEffect = nullptr;
 
 	UPROPERTY ( VisibleAnywhere , BlueprintReadOnly , Category = "NEKIRO|ActionComp|Attack" )

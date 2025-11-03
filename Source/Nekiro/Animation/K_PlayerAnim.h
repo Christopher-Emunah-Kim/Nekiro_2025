@@ -43,21 +43,6 @@ public:
 	UFUNCTION()
 	void AnimNotify_NextAttackCheck ();
 
-
-
-	//void UEnemyAnimInstance::AnimNotify_DamageEnd ()
-	//{
-	//	//몽타주 재생을 멈추고싶다.
-	//	Montage_Stop ( 0.1f , EnemyMontage );
-	//}
-
-	//void UEnemyAnimInstance::AnimNotify_DieEnd ()
-	//{
-	//	//몽타주 재생을 멈추고싶다.
-	//	Montage_Stop ( 0.1f , EnemyMontage );
-	//}
-
-
 	void SetPlayerCharacter ( class AK_Player& player );
 	void SetIsCrouch ( bool bCrouch ) { m_playerAnimStates.bIsCrouch = bCrouch; }
 	bool GetIsCrouch () { return m_playerAnimStates.bIsCrouch; }
