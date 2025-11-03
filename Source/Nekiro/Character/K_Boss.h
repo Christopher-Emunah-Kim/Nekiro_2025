@@ -9,7 +9,8 @@
 #include "K_Boss.generated.h"
 
 class UBehaviorTree;
-class UBlackboardData; 
+class UBlackboardData;
+class UStaticMeshComponent;
 class UK_BossAnim;
 class UK_ActionComp;
 class UK_StatusComp;
@@ -56,9 +57,6 @@ public:
 	UFUNCTION ( BlueprintCallable , Category = "NEKIRO|Boss|AI" )
 	UK_StatusComp* GetStatusComp () const { return statusComp; }
 
-	UFUNCTION ( BlueprintCallable , Category = "NEKIRO|Boss|AI" )
-	UK_ActionComp* GetActionComp () const { return actionComp; }
-
 protected:
 
 	UPROPERTY ( EditDefaultsOnly , BlueprintReadOnly , Category = "NEKIRO|BT" , meta = (AllowPrivateAccess = "true") )
@@ -74,10 +72,11 @@ protected:
 	FBossAnimStates bossAnimStates;
 
 	UPROPERTY ( VisibleAnywhere , BlueprintReadOnly , Category = "NEKIRO|Component" , meta = ( AllowPrivateAccess = "true" ) )
-	UK_ActionComp* actionComp;
+	UK_StatusComp* statusComp;
 
 	UPROPERTY ( VisibleAnywhere , BlueprintReadOnly , Category = "NEKIRO|Component" , meta = ( AllowPrivateAccess = "true" ) )
-	UK_StatusComp* statusComp;
+	UStaticMeshComponent* katanaMeshComp;
+
 
 	UPROPERTY ( EditDefaultsOnly , BlueprintReadOnly , Category = "NEKIRO|DataAssets" , meta = (AllowPrivateAccess = "true" , ToolTip = "Boss Movement Data Asset") )
 	UK_MovementData* movementData;

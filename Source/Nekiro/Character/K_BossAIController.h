@@ -4,6 +4,8 @@
 
 #include "CoreMinimal.h"
 #include "AIController.h"
+#include "TimerManager.h"
+
 #include "K_BossAIController.generated.h"
 
 /**
@@ -27,6 +29,7 @@ protected:
 	virtual void OnUnPossess () override;
 
 	void InitializeBehaviorTree ( AK_Boss* boss );
+	void OnRepeatTimer ();
 
 public:
 	UFUNCTION ( BlueprintCallable , Category = "NEKIRO|BOSS|AI" )
@@ -34,6 +37,10 @@ public:
 
 	UFUNCTION ( BlueprintCallable , Category = "NEKIRO|BOSS|AI" )
 	void ClearTargetActor ();
+
+
+
+
 
 protected:
 	UPROPERTY ( VisibleAnywhere , BlueprintReadOnly , Category = "NEKIRO|BOSS|AI" )
@@ -44,5 +51,13 @@ protected:
 
 	UPROPERTY ( VisibleAnywhere , BlueprintReadOnly , Category = "NEKIRO|BOSS|AI" )
 	FName targetActorName;
+
+	FTimerHandle repeatTimerHandle;
+	float repeatInterval;
+
+public:
+	static const FName currentPosKey;
+	static const FName patrolPosKey;
+	static const FName targetActorKey;
 
 };

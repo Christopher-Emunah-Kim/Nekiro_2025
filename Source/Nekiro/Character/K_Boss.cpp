@@ -12,6 +12,7 @@
 #include "BehaviorTree/BlackboardData.h"
 
 #include "Components/CapsuleComponent.h"
+#include "Components/StaticMeshComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 
 // Sets default values
@@ -30,11 +31,10 @@ AK_Boss::AK_Boss()
 
 		bossMovementComp->bUseControllerDesiredRotation = true;
 		bossMovementComp->bOrientRotationToMovement = false;
-		bossMovementComp->MaxWalkSpeed = 150.f;
 		bossMovementComp->RotationRate = FRotator ( 0.f , 360.f , 0.f );
 	}
 
-	static ConstructorHelpers::FObjectFinder<USkeletalMesh> tempMesh ( TEXT ( "/Script/Engine.SkeletalMesh'/Game/Assets/Character/Assassin/Mesh/SK_Assassin.SK_Assassin'" ) );
+	static ConstructorHelpers::FObjectFinder<USkeletalMesh> tempMesh ( TEXT ( "/Script/Engine.SkeletalMesh'/Game/Assets/Character/Mixamo/X_Bot.X_Bot'" ) );
 	if(tempMesh.Succeeded())
 	{
 		GetMesh ()->SetSkeletalMesh ( tempMesh.Object );
@@ -50,10 +50,19 @@ AK_Boss::AK_Boss()
 		GetMesh ()->SetAnimInstanceClass ( tempABP.Class );
 	}
 
+
+	katanaMeshComp = CreateDefaultSubobject<UStaticMeshComponent> ( TEXT ( "KatanaMeshComp" ) );
+	katanaMeshComp->SetupAttachment ( GetMesh () , TEXT ( "RightHandSocketSheath" ) );
+	static ConstructorHelpers::FObjectFinder<UStaticMesh> tempKatanaMesh ( TEXT ( "/Game/Assets/Character/GhostSamurai_Bundle/GhostSamurai/Weapon/Mesh/Katana/SM_Katana01.SM_Katana01" ) );
+	if (tempKatanaMesh.Succeeded ())
+	{
+		katanaMeshComp->SetStaticMesh ( tempKatanaMesh.Object );
+	}
+
+
 	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
 	AIControllerClass = AK_BossAIController::StaticClass ();
 
-	actionComp = CreateDefaultSubobject<UK_ActionComp> ( TEXT ( "ActionComp" ) );
 	statusComp = CreateDefaultSubobject<UK_StatusComp> ( TEXT ( "StatusComp" ) );
 
 	bossAnimStates.bIsAttack = false;
@@ -65,6 +74,9 @@ void AK_Boss::BeginPlay()
 {
 	Super::BeginPlay();
 	
+	UCharacterMovementComponent* bossMovementComp = GetCharacterMovement ();
+	bossMovementComp->MaxWalkSpeed = movementData? movementData->BOSS_RUN_SPEED : 600.0f;
+
 	BindDelegateActions ();
 }
 
@@ -74,20 +86,12 @@ void AK_Boss::OnBossStateChanged (FName actionName , bool bIsActive )
 	if (bIsActive == true)
 	{
 		bossAnimStates.actionName = actionName;
-
-		if (actionComp)
-		{
-			//acttionComp->StartAction ( actionName );
-		}
+		//StartAction
 	}
 	else
 	{
 		bossAnimStates.actionName = NAME_None;
-
-		if (actionComp)
-		{
-			//actionComp->StopAction ( actionName );
-		}
+		//EndAction
 	}
 }
 
@@ -127,11 +131,7 @@ void AK_Boss::ReqeustAttack(const FName& attackName)
 		return;
 	}
 
-
-	if (actionComp)
-	{
-		//actionComp->RequestAction(attackName);
-	}
+	//Request Attack
 }
 
 void AK_Boss::ReqeustSkill(const FName& skillName)
@@ -142,10 +142,6 @@ void AK_Boss::ReqeustSkill(const FName& skillName)
 		return;
 	}
 
-
-	if (actionComp)
-	{
-		//actionComp->RequestAction(skillName);
-	}
+	//Request Skill
 }
 

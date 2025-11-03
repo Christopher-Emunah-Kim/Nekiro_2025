@@ -27,7 +27,7 @@ void UK_BossAnim::NativeUpdateAnimation ( float DeltaSeconds )
 
 	if(!bossCharacter.IsValid())
 	{
-		bossAnimStates.moveSpeed = 0.f;
+		bossAnimStates.bossSpeed = 0.f;
 		bossAnimStates.bIsFalling = false;
 		bossAnimStates.bIsDead = true;
 		return;
@@ -36,7 +36,7 @@ void UK_BossAnim::NativeUpdateAnimation ( float DeltaSeconds )
 	const UCharacterMovementComponent* movementComp = bossCharacter->GetCharacterMovement ();
 	if (movementComp)
 	{
-		bossAnimStates.moveSpeed = bossCharacter->GetVelocity ().Size2D ();
+		bossAnimStates.bossSpeed = bossCharacter->GetVelocity ().Size2D ();
 		bossAnimStates.bIsFalling = movementComp->IsFalling ();
 	}
 }

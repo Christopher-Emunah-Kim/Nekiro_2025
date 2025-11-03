@@ -34,7 +34,10 @@ struct NEKIRO_API FBossAnimStates
 
 public:
 	UPROPERTY ( EditAnywhere, BlueprintReadOnly , Category = "NEKIRO|BOSS|Animation" )
-	float moveSpeed = 350.f;
+	float bossSpeed;
+
+	UPROPERTY ( EditAnywhere, BlueprintReadOnly , Category = "NEKIRO|BOSS|Animation" )
+	float bossDirection;
 
 	UPROPERTY ( EditAnywhere, BlueprintReadOnly , Category = "NEKIRO|BOSS|Animation" )
 	bool bIsDead = false;
