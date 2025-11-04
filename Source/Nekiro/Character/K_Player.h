@@ -21,11 +21,16 @@ class NEKIRO_API AK_Player : public ACharacter
 	GENERATED_BODY()
 
 public:
-	AK_Player();
+	AK_Player ();
+
+	void InitializeInputSettings ();
 
 protected:
 	virtual void BeginPlay() override;
-	void PerformDefaultSettings ( );
+	
+	virtual void PossessedBy ( AController* newController ) override;
+
+	void InitializeComponents ();
 
 public:	
 	virtual void Tick(float DeltaTime) override;
@@ -47,6 +52,7 @@ public:
 	void OnPlayerJump ();
 	void OnPlayerInteraction ();
 	void OnPlayerFinish ();
+
 
 	void SetWeaponCollision ( bool bEnable );
 

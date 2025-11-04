@@ -22,6 +22,17 @@ AK_Player::AK_Player()
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
+	InitializeComponents ();
+
+	static ConstructorHelpers::FClassFinder<UAnimInstance> tempABP ( TEXT ( "/Script/Engine.AnimBlueprint'/Game/Blueprints/Player/ABP_Player.ABP_Player_C'" ) );
+	if (tempABP.Succeeded ())
+	{
+		GetMesh ()->SetAnimInstanceClass ( tempABP.Class );
+	}
+}
+
+void AK_Player::InitializeComponents ()
+{
 	statusComp = CreateDefaultSubobject<UK_StatusComp> ( TEXT ( "StatusComp" ) );
 	actionComp = CreateDefaultSubobject<UK_ActionComp> ( TEXT ( "ActionComp" ) );
 
@@ -32,7 +43,7 @@ AK_Player::AK_Player()
 	springArmComp->bUsePawnControlRotation = true;
 
 	cameraComp = CreateDefaultSubobject<UCameraComponent> ( TEXT ( "CameraComp" ) );
-	cameraComp->SetupAttachment ( springArmComp);
+	cameraComp->SetupAttachment ( springArmComp );
 	cameraComp->bUsePawnControlRotation = false;
 
 	bUseControllerRotationYaw = true;
@@ -47,12 +58,6 @@ AK_Player::AK_Player()
 		GetMesh ()->SetWorldScale3D ( FVector ( 0.9f , 0.9f , 0.9f ) );
 	}
 
-	static ConstructorHelpers::FClassFinder<UAnimInstance> tempABP ( TEXT ( "/Script/Engine.AnimBlueprint'/Game/Blueprints/ABP_Player.ABP_Player_C'" ) );
-	if (tempABP.Succeeded ())
-	{
-		GetMesh ()->SetAnimInstanceClass ( tempABP.Class );
-	}
-
 	//Weapon Collision Setup
 	//TODO 에디터에서 소켓이름 지정
 	weaponCollisionComp = CreateDefaultSubobject<USphereComponent> ( TEXT ( "WeaponCollisionComp" ) );
@@ -65,7 +70,19 @@ void AK_Player::BeginPlay ()
 {
 	Super::BeginPlay ();
 
-	PerformDefaultSettings ();
+	InitializeInputSettings ();
+
+	//Animation Instance Setup
+	playerAnim = Cast<UK_PlayerAnim> ( GetMesh ()->GetAnimInstance () );
+	if (!playerAnim)
+	{
+		UE_LOG ( LogTemp , Warning , TEXT ( "No Player Anim Instance found!" ) );
+		return;
+	}
+	playerAnim->SetPlayerCharacter ( *this );
+
+	//Weapon Collision Setup
+	SetWeaponCollision ( false );
 
 	//Bind Action Component Delegates
 	if (actionComp)
@@ -82,7 +99,14 @@ void AK_Player::BeginPlay ()
 	}
 }
 
-void AK_Player::PerformDefaultSettings ()
+void AK_Player::PossessedBy ( AController* newController )
+{
+	Super::PossessedBy ( newController );
+
+	//InitializeInputSettings ();
+}
+
+void AK_Player::InitializeInputSettings ()
 {
 	//Input Mapping Context Setup
 	AK_PlayerController* pc = Cast<AK_PlayerController> ( GetController () );
@@ -91,6 +115,15 @@ void AK_Player::PerformDefaultSettings ()
 		UE_LOG ( LogTemp , Warning , TEXT ( "No Player Controller found!" ) );
 		return;
 	}
+	//FInputModeGameAndUI inputMode;
+	//inputMode.SetLockMouseToViewportBehavior ( EMouseLockMode::LockAlways );
+	//inputMode.SetHideCursorDuringCapture ( true );
+	FInputModeGameOnly inputMode2;
+
+	pc->SetInputMode ( inputMode2 );
+	pc->bShowMouseCursor = false;
+	pc->bEnableMouseOverEvents = false;
+	
 
 	UEnhancedInputLocalPlayerSubsystem* subsys = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem> ( pc->GetLocalPlayer () );
 	if (!subsys)
@@ -100,19 +133,6 @@ void AK_Player::PerformDefaultSettings ()
 	}
 
 	subsys->AddMappingContext ( IMC_Player , 0 );
-	//UE_LOG ( LogTemp , Warning , TEXT ( "Input Mapping Context Added!" ) );
-
-	//Animation Instance Setup
-	playerAnim = Cast<UK_PlayerAnim> ( GetMesh ()->GetAnimInstance () );
-	if (!playerAnim)
-	{
-		UE_LOG ( LogTemp , Warning , TEXT ( "No Player Anim Instance found!" ) );
-		return;
-	}
-	playerAnim->SetPlayerCharacter ( *this );
-
-	//Weapon Collision Setup
-	SetWeaponCollision ( false );
 }
 
 // Called every frame
@@ -187,6 +207,7 @@ void AK_Player::OnPlayerLook ( const FInputActionValue& value )
 	{
 		AddControllerYawInput ( inputVector.X * mouseSensitivity );
 		AddControllerPitchInput ( -inputVector.Y * mouseSensitivity );
+		//UE_LOG ( LogTemp , Warning , TEXT ( "Player Look Input X: %f , Y: %f" ) , inputVector.X , inputVector.Y );
 	}
 }
 
