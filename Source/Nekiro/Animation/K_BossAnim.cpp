@@ -63,20 +63,26 @@ void UK_BossAnim::HandleMontageEnded ( UAnimMontage* montage , bool bInterrupted
 {
 	OnBossActionStateChangeDel.Broadcast ( bossAnimStates.actionName , false );
 	bossAnimStates.actionName = NAME_None;
+
+	if (montage == attackMontage)
+	{
+		OnBossAttackAnimEndDel.Broadcast ();
+	}
 }
 
 
-void UK_BossAnim::PlayBossActionMontage ( UAnimMontage* montageToPlay, FName startSectionName )
+void UK_BossAnim::PlayBossAttackMontage (  FName startSectionName )
 {
-	if (! montageToPlay )
+	if(!attackMontage)
 	{
+		UE_LOG ( LogTemp , Warning , TEXT ( "No Attack Montage found!" ) );
 		return;
 	}
 
 	//update section name
 	if (startSectionName.IsNone ())
 	{
-		startSectionName = montageToPlay->GetFName ();
+		startSectionName = attackMontage->GetFName ();
 	}
 
 	bossAnimStates.actionName = startSectionName;
@@ -84,11 +90,11 @@ void UK_BossAnim::PlayBossActionMontage ( UAnimMontage* montageToPlay, FName sta
 	//stop and play
 	Montage_Stop ( 0.1f );
 
-	Montage_Play ( montageToPlay, bossAnimStates.playRate );
+	Montage_Play ( attackMontage , bossAnimStates.playRate );
 
 	if (startSectionName != NAME_None)
 	{
-		Montage_JumpToSection ( startSectionName , montageToPlay );
+		Montage_JumpToSection ( startSectionName , attackMontage );
 	}
 
 	//bind end delegate
@@ -96,8 +102,15 @@ void UK_BossAnim::PlayBossActionMontage ( UAnimMontage* montageToPlay, FName sta
 	endDelegate.BindUObject ( this , &UK_BossAnim::HandleMontageEnded);
 
 	//execute delegate when montage ends
-	Montage_SetEndDelegate ( endDelegate , montageToPlay );
+	Montage_SetEndDelegate ( endDelegate , attackMontage );
 
 	//broadcast boss action change
 	OnBossActionStateChangeDel.Broadcast ( bossAnimStates.actionName , true );
+}
+
+void UK_BossAnim::AnimNotify_NSBossAttack ()
+{
+	bossCharacter->PerformAttack ();
+
+	UE_LOG ( LogTemp , Warning , TEXT ( "Boss Attack Notify Triggered!" ) );
 }

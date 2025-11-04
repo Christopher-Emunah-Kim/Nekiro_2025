@@ -3,6 +3,7 @@
 
 #include "K_Boss.h"
 #include "K_BossAIController.h"
+#include "NEKIRO/Character/K_Player.h"
 #include "NEKIRO/Animation/K_BossAnim.h"
 #include "NEKIRO/Components/K_ActionComp.h"
 #include "NEKIRO/Components/K_StatusComp.h"
@@ -14,6 +15,7 @@
 #include "Components/CapsuleComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include <Kismet/GameplayStatics.h>
 
 // Sets default values
 AK_Boss::AK_Boss()
@@ -57,6 +59,11 @@ AK_Boss::AK_Boss()
 	if (tempKatanaMesh.Succeeded ())
 	{
 		katanaMeshComp->SetStaticMesh ( tempKatanaMesh.Object );
+		katanaMeshComp->SetCollisionEnabled ( ECollisionEnabled::NoCollision );
+		katanaMeshComp->SetCollisionObjectType ( ECC_WorldDynamic );
+		katanaMeshComp->SetCollisionResponseToAllChannels ( ECR_Ignore );
+		katanaMeshComp->SetCollisionResponseToChannel ( ECC_Pawn , ECR_Overlap );
+		katanaMeshComp->SetGenerateOverlapEvents ( false );
 	}
 
 
@@ -100,6 +107,11 @@ void AK_Boss::OnBossStateChanged (FName actionName , bool bIsActive )
 	}
 }
 
+void AK_Boss::OnAttackEnd ()
+{
+	OnBossAttackEndDel.Broadcast ();
+}
+
 void AK_Boss::BindAnimDelegateActions ()
 {
 
@@ -118,6 +130,7 @@ void AK_Boss::BindAnimDelegateActions ()
 	if (bossAnim)
 	{
 		bossAnim->OnBossActionStateChangeDel.AddDynamic ( this , &AK_Boss::OnBossStateChanged );
+		bossAnim->OnBossAttackAnimEndDel.AddDynamic ( this , &AK_Boss::OnAttackEnd );
 	}
 }
 
@@ -150,20 +163,45 @@ void AK_Boss::ReqeustAttack(const FName& attackName)
 		return;
 	}
 
-	//Request Attack
+	bossAnim->PlayBossAttackMontage ( attackName );
+
+	UE_LOG ( LogTemp , Warning , TEXT ( "Boss Request Attack: %s" ) , *attackName.ToString () );
 }
 
-void AK_Boss::ReqeustSkill(const FName& skillName)
+float AK_Boss::GetBossAttackRange () const
 {
-	BindAnimDelegateActions ();
-	if(!bossAnim)
+	return movementData ? movementData->BOSS_ATTACK_RANGE : 200.0f;
+}
+
+void AK_Boss::PerformAttack ( )
+{
+	if(!katanaMeshComp)
 	{
 		return;
 	}
 
-	//Request Skill
-}
+	katanaMeshComp->SetCollisionEnabled ( ECollisionEnabled::QueryAndPhysics );
+	katanaMeshComp->SetGenerateOverlapEvents ( true );
+	katanaMeshComp->UpdateOverlaps ();
 
+	TArray<AActor*> overlappingActors;
+	katanaMeshComp->GetOverlappingActors ( overlappingActors, AK_Player::StaticClass() );
+
+	float bossAttackDamage = bossCombatData ? bossCombatData->BOSS_DEFAULT_ATTACK_DAMAGE : 20.f;
+
+	for(AActor* actor : overlappingActors)
+	{
+		AK_Player* player = Cast<AK_Player> ( actor );
+		if (player)
+		{
+			UGameplayStatics::ApplyDamage ( player , bossAttackDamage , GetController () , this , UDamageType::StaticClass () );
+			UE_LOG ( LogTemp , Warning , TEXT ( "Boss Attack Hit Player!" ) );
+		}
+	}
+
+	katanaMeshComp->SetGenerateOverlapEvents ( false );
+	katanaMeshComp->SetCollisionEnabled ( ECollisionEnabled::NoCollision );
+}
 
 void AK_Boss::OnBossDeath ()
 {

@@ -8,6 +8,9 @@
 #include "Nekiro/Animation/K_BossAnimStates.h"
 #include "K_Boss.generated.h"
 
+
+DECLARE_MULTICAST_DELEGATE ( FOnBossAttackEndDelegate );
+
 class UBehaviorTree;
 class UBlackboardData;
 class UStaticMeshComponent;
@@ -15,6 +18,7 @@ class UK_BossAnim;
 class UK_ActionComp;
 class UK_StatusComp;
 class UK_MovementData;
+class UK_CombatData;
 
 UCLASS()
 class NEKIRO_API AK_Boss : public ACharacter
@@ -27,10 +31,13 @@ public:
 protected:
 	virtual void BeginPlay() override;
 
+	void BindAnimDelegateActions ();
+
 	UFUNCTION()
 	void OnBossStateChanged (FName actionName , bool bIsActive );
 
-	void BindAnimDelegateActions ();
+	UFUNCTION()
+	void OnAttackEnd ();
 
 	UFUNCTION()
 	void OnBossDeath ();
@@ -40,17 +47,18 @@ public:
 
 	virtual float TakeDamage ( float DamageAmount , struct FDamageEvent const& DamageEvent , AController* EventInstigator , AActor* DamageCauser ) override;
 
-
+	FOnBossAttackEndDelegate OnBossAttackEndDel;
 
 
 	UFUNCTION ( BlueprintCallable , Category = "NEKIRO|Boss|Combat" )
 	void ReqeustAttack ( const FName& attackName );
 
 	UFUNCTION ( BlueprintCallable , Category = "NEKIRO|Boss|Combat" )
-	void ReqeustSkill ( const FName& skillName );
+	void PerformAttack ();
 
+	float GetBossAttackRange () const;
 
-
+	//Getters
 	UFUNCTION ( BlueprintCallable , Category = "NEKIRO|Boss|AI" )
 	UBehaviorTree* GetBossBehaviorTree () const { return bossBehaviorTree; }
 
@@ -59,6 +67,8 @@ public:
 
 	UFUNCTION ( BlueprintCallable , Category = "NEKIRO|Boss|AI" )
 	UK_StatusComp* GetStatusComp () const { return statusComp; }
+
+	UStaticMeshComponent* GetKatanaMeshComp () const { return katanaMeshComp; }
 
 protected:
 
@@ -80,9 +90,11 @@ protected:
 	UPROPERTY ( VisibleAnywhere , BlueprintReadOnly , Category = "NEKIRO|Component" , meta = ( AllowPrivateAccess = "true" ) )
 	UStaticMeshComponent* katanaMeshComp;
 
-
 	UPROPERTY ( EditDefaultsOnly , BlueprintReadOnly , Category = "NEKIRO|DataAssets" , meta = (AllowPrivateAccess = "true" , ToolTip = "Boss Movement Data Asset") )
 	UK_MovementData* movementData;
+
+	UPROPERTY ( EditDefaultsOnly , BlueprintReadOnly , Category = "NEKIRO|DataAssets" , meta = (AllowPrivateAccess = "true" , ToolTip = "Boss Combat Data Asset") )
+	UK_CombatData* bossCombatData;
 
 
 };

@@ -9,6 +9,7 @@
 #include "K_BossAnim.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams ( FBossActionStateChangeDelegate , FName , actionName , bool , bIsActive );
+DECLARE_DYNAMIC_MULTICAST_DELEGATE ( FOnBossAttackAnimEndDelegate );
 
 class UAnimMontage;
 /**
@@ -25,7 +26,6 @@ public:
 	virtual void NativeInitializeAnimation () override;
 	virtual void NativeUpdateAnimation ( float DeltaSeconds ) override;
 
-
 protected:
 	void CacheBossCharacter ();
 
@@ -36,8 +36,14 @@ public:
 	UPROPERTY ( BlueprintAssignable , Category = "NEKIRO|Boss|Animation" )
 	FBossActionStateChangeDelegate OnBossActionStateChangeDel;
 
+	UPROPERTY ( BlueprintAssignable , Category = "NEKIRO|Boss|Animation" )
+	FOnBossAttackAnimEndDelegate OnBossAttackAnimEndDel;
+
 	UFUNCTION ( BlueprintCallable , Category = "NEKIRO|Boss|Animation" )
-	void PlayBossActionMontage ( UAnimMontage* montageToPlay, FName startSectionName );
+	void PlayBossAttackMontage ( FName startSectionName );
+
+	UFUNCTION()
+	void AnimNotify_NSBossAttack ();
 
 private:
 	TWeakObjectPtr<class AK_Boss> bossCharacter;
@@ -48,8 +54,5 @@ protected:
 
 	UPROPERTY ( EditAnywhere , BlueprintReadWrite , Category = "NEKIRO|Boss|Animation" )
 	UAnimMontage* attackMontage;
-
-	UPROPERTY ( EditAnywhere , BlueprintReadWrite , Category = "NEKIRO|Boss|Animation" )
-	TMap<FName , UAnimMontage*> skillMontageMap;
 
 };
