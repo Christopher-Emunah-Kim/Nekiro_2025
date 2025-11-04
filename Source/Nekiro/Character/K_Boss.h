@@ -74,34 +74,43 @@ public:
 	UStaticMeshComponent* GetKatanaMeshComp () const { return katanaMeshComp; }
 
 protected:
-
+	//AI
 	UPROPERTY ( EditDefaultsOnly , BlueprintReadOnly , Category = "NEKIRO|BT" , meta = (AllowPrivateAccess = "true") )
 	UBehaviorTree* bossBehaviorTree;
 
 	UPROPERTY ( EditDefaultsOnly , BlueprintReadOnly , Category = "NEKIRO|BT" , meta = (AllowPrivateAccess = "true") )
 	UBlackboardData* bossBlackboardData;
 
+	//Animation
 	UPROPERTY ( VisibleAnywhere , BlueprintReadOnly , Category = "NEKIRO|Animation" , meta = ( AllowPrivateAccess = "true" ) )
 	UK_BossAnim* bossAnim;
 
 	UPROPERTY ( VisibleAnywhere , BlueprintReadOnly , Category = "NEKIRO|Animation" , meta = ( AllowPrivateAccess = "true" ) )
 	FBossAnimStates bossAnimStates;
 
+	//Components
 	UPROPERTY ( VisibleAnywhere , BlueprintReadOnly , Category = "NEKIRO|Component" , meta = ( AllowPrivateAccess = "true" ) )
 	UK_StatusComp* statusComp;
 
 	UPROPERTY ( VisibleAnywhere , BlueprintReadOnly , Category = "NEKIRO|Component" , meta = ( AllowPrivateAccess = "true" ) )
 	UStaticMeshComponent* katanaMeshComp;
 
+
+	//Data Assets
 	UPROPERTY ( EditDefaultsOnly , BlueprintReadOnly , Category = "NEKIRO|DataAssets" , meta = (AllowPrivateAccess = "true" , ToolTip = "Boss Movement Data Asset") )
 	UK_MovementData* movementData;
 
 	UPROPERTY ( EditDefaultsOnly , BlueprintReadOnly , Category = "NEKIRO|DataAssets" , meta = (AllowPrivateAccess = "true" , ToolTip = "Boss Combat Data Asset") )
 	UK_CombatData* bossCombatData;
 
+	//UI
 	UPROPERTY ( VisibleAnywhere , BlueprintReadOnly , Category = "NEKIRO|UI" , meta = ( AllowPrivateAccess = "true" ) )
 	UWidgetComponent* bossHPUIComp;
 
 	UPROPERTY ( VisibleAnywhere , BlueprintReadOnly , Category = "NEKIRO|UI" , meta = (AllowPrivateAccess = "true") )
 	class UBossHPWidget* bossHPUI;
+
+	//Combat
+	TSet<TWeakObjectPtr<AActor>> currentAttackHitActors;
+
 };

@@ -5,15 +5,20 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Components/SphereComponent.h"
 #include "Components/CapsuleComponent.h"
+#include "Components/WidgetComponent.h"
 
 #include <EnhancedInputSubsystems.h>
 #include <EnhancedInputComponent.h>
 #include <Kismet/KismetMathLibrary.h>
 #include <Kismet/GameplayStatics.h>
+#include <Blueprint/UserWidget.h>
 
 #include "K_PlayerController.h"
 #include "Nekiro/Animation/K_PlayerAnim.h"
 #include "Nekiro/Data/K_DataAssets.h"
+#include "Nekiro/Components/K_StatusComp.h"
+#include "Nekiro/Components/K_ActionComp.h"
+#include "Nekiro/UI/K_MainHUDUI.h"
 #include "K_Boss.h"
 
 // Sets default values
@@ -29,6 +34,7 @@ AK_Player::AK_Player()
 	{
 		GetMesh ()->SetAnimInstanceClass ( tempABP.Class );
 	}
+
 }
 
 void AK_Player::InitializeComponents ()
@@ -63,6 +69,7 @@ void AK_Player::InitializeComponents ()
 	weaponCollisionComp = CreateDefaultSubobject<USphereComponent> ( TEXT ( "WeaponCollisionComp" ) );
 	weaponCollisionComp->SetupAttachment ( GetMesh () , weaponSocketName );
 	weaponCollisionComp->SetSphereRadius ( 50.f );
+
 }
 
 // Called when the game starts or when spawned
@@ -96,6 +103,29 @@ void AK_Player::BeginPlay ()
 	if (statusComp)
 	{
 		statusComp->OnDeathDel.AddDynamic ( this , &AK_Player::OnPlayerDeath );
+	}
+
+	//UI Setup
+	if (playerUIFactory)
+	{
+		APlayerController* PC = Cast<APlayerController> ( GetController () );
+		if (PC)
+		{
+			playerHUDUI = CreateWidget<UUserWidget> ( PC , playerUIFactory );
+			if (playerHUDUI)
+			{
+				playerHUDUI->AddToViewport ();
+				UE_LOG ( LogTemp , Log , TEXT ( "Player HUD UI created successfully" ) );
+			}
+			else
+			{
+				UE_LOG ( LogTemp , Error , TEXT ( "Failed to create Player HUD UI" ) );
+			}
+		}
+	}
+	else
+	{
+		UE_LOG ( LogTemp , Warning , TEXT ( "playerUIFactory is not set in Blueprint!" ) );
 	}
 }
 
@@ -140,6 +170,14 @@ void AK_Player::Tick ( float DeltaTime )
 {
 	Super::Tick ( DeltaTime );
 
+	if (playerHUDUI)
+	{
+		UK_MainHUDUI* mainHUD = Cast<UK_MainHUDUI> ( playerHUDUI );
+		if(mainHUD && statusComp)
+		{
+			mainHUD->SetHPPercent ( statusComp->GetCurrentHealth () , statusComp->GetMaxHealth () );
+		}
+	}
 }
 
 // Called to bind functionality to input

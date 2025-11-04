@@ -215,6 +215,7 @@ void AK_Boss::ReqeustAttack(const FName& attackName)
 	{
 		return;
 	}
+	currentAttackHitActors.Empty ();
 
 	bossAnim->PlayBossAttackMontage ( attackName );
 
@@ -233,27 +234,69 @@ void AK_Boss::PerformAttack ( )
 		return;
 	}
 
-	katanaMeshComp->SetCollisionEnabled ( ECollisionEnabled::QueryAndPhysics );
+	FVector weaponLocation = katanaMeshComp->GetComponentLocation ();
+	float attackRadius = 150.0f;
+
+	TArray<AActor*> foundActors; 
+	UGameplayStatics::GetAllActorsOfClass ( GetWorld () , AK_Player::StaticClass () , foundActors );
+
+	float bossAttackDamage = bossCombatData ? bossCombatData->BOSS_DEFAULT_ATTACK_DAMAGE : 20.f;
+
+	for (AActor* actor : foundActors)
+	{
+		if (currentAttackHitActors.Contains ( actor ))
+		{
+			continue;
+		}
+
+		AK_Player* player = Cast<AK_Player> ( actor );
+		if (!player)
+		{
+			continue;
+		}
+
+		float distance = FVector::Dist ( weaponLocation , player->GetActorLocation () );
+		if(distance <= attackRadius)
+		{
+			UGameplayStatics::ApplyDamage ( player , bossAttackDamage , GetController () , this , UDamageType::StaticClass () );
+			UE_LOG ( LogTemp , Warning , TEXT ( "Boss Attack Hit Player!" ) );
+
+			currentAttackHitActors.Add ( actor );
+		}
+		else
+		{
+			UE_LOG ( LogTemp , Warning , TEXT ( "Boss Missed Player!" ) );
+		}
+	}
+
+	/*katanaMeshComp->SetCollisionEnabled ( ECollisionEnabled::QueryAndPhysics );
 	katanaMeshComp->SetGenerateOverlapEvents ( true );
 	katanaMeshComp->UpdateOverlaps ();
 
 	TArray<AActor*> overlappingActors;
-	katanaMeshComp->GetOverlappingActors ( overlappingActors, AK_Player::StaticClass() );
+	katanaMeshComp->GetOverlappingActors ( overlappingActors, AK_Player::StaticClass() );*/
 
-	float bossAttackDamage = bossCombatData ? bossCombatData->BOSS_DEFAULT_ATTACK_DAMAGE : 20.f;
+	/*float bossAttackDamage = bossCombatData ? bossCombatData->BOSS_DEFAULT_ATTACK_DAMAGE : 20.f;
 
 	for(AActor* actor : overlappingActors)
 	{
+		if(currentAttackHitActors.Contains ( actor ))
+		{
+			continue;
+		}
+
 		AK_Player* player = Cast<AK_Player> ( actor );
 		if (player)
 		{
 			UGameplayStatics::ApplyDamage ( player , bossAttackDamage , GetController () , this , UDamageType::StaticClass () );
 			UE_LOG ( LogTemp , Warning , TEXT ( "Boss Attack Hit Player!" ) );
-		}
-	}
 
-	katanaMeshComp->SetGenerateOverlapEvents ( false );
-	katanaMeshComp->SetCollisionEnabled ( ECollisionEnabled::NoCollision );
+			currentAttackHitActors.Add ( actor );
+		}
+	}*/
+
+	/*katanaMeshComp->SetGenerateOverlapEvents ( false );
+	katanaMeshComp->SetCollisionEnabled ( ECollisionEnabled::NoCollision );*/
 }
 
 void AK_Boss::OnBossDeath ()

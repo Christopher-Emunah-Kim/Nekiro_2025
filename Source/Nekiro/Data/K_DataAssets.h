@@ -90,7 +90,7 @@ class NEKIRO_API UK_StatusData : public UDataAsset
 
 public:
 	UPROPERTY ( EditAnywhere , BlueprintReadOnly , Category = "NEKIRO|Status|Player" , meta = (ClampMin = "0.0") )
-	float PLAYER_MAX_HEALTH = 80.0f;
+	float PLAYER_MAX_HEALTH = 200.0f;
 
 	UPROPERTY ( EditAnywhere , BlueprintReadOnly , Category = "NEKIRO|Status|Player" , meta = (ClampMin = "0.0") )
 	float PLAYER_HEALTH_REGEN_RATE = 3.0f;

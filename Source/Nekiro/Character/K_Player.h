@@ -94,6 +94,13 @@ private:
 	UPROPERTY ( VisibleAnywhere , BlueprintReadOnly , Category = "NEKIRO|Animation" , meta = (AllowPrivateAccess = "true") )
 	class UK_PlayerAnim* playerAnim;
 
+	//UI
+	UPROPERTY ( EditDefaultsOnly , BlueprintReadOnly , Category = "NEKIRO|UI" , meta = (AllowPrivateAccess = "true") )
+	TSubclassOf<class UUserWidget> playerUIFactory;
+
+	UPROPERTY()
+	class UUserWidget* playerHUDUI;
+
 	//Components
 	UPROPERTY ( VisibleAnywhere , BlueprintReadOnly , Category = "NEKIRO|Components" , meta = (AllowPrivateAccess = "true") )
 	class USpringArmComponent* springArmComp;
