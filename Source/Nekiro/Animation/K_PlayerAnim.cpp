@@ -71,13 +71,13 @@ void UK_PlayerAnim::EnterAttatkState ( int32 comboIndex )
 	if (Montage_IsPlaying ( attackMontage ))
 	{
 		Montage_JumpToSection ( selectSection , attackMontage );
-		UE_LOG ( LogTemp , Warning , TEXT ( "UK_PlayerAnim::EnterAttatkState - Jumped to Section: %s" ) , *selectSection.ToString () );
+		//UE_LOG ( LogTemp , Warning , TEXT ( "UK_PlayerAnim::EnterAttatkState - Jumped to Section: %s" ) , *selectSection.ToString () );
 	}
 	else
 	{
 		Montage_Play ( attackMontage , 1.f );
 		Montage_JumpToSection ( selectSection , attackMontage );
-		UE_LOG ( LogTemp , Warning , TEXT ( "UK_PlayerAnim::EnterAttatkState - Started and Jumped to Section: %s" ) , *selectSection.ToString () );
+		//UE_LOG ( LogTemp , Warning , TEXT ( "UK_PlayerAnim::EnterAttatkState - Started and Jumped to Section: %s" ) , *selectSection.ToString () );
 	}
 
 	FOnMontageEnded endDel;

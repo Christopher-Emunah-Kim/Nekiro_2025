@@ -8,12 +8,14 @@
 #include "NEKIRO/Components/K_ActionComp.h"
 #include "NEKIRO/Components/K_StatusComp.h"
 #include "NEKIRO/Data/K_DataAssets.h"
+#include "NEKIRO/UI/BossHPWidget.h"
 
 #include "BehaviorTree/BehaviorTree.h"
 #include "BehaviorTree/BlackboardData.h"
 
 #include "Components/CapsuleComponent.h"
 #include "Components/StaticMeshComponent.h"
+#include "Components/WidgetComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include <Kismet/GameplayStatics.h>
 
@@ -23,9 +25,23 @@ AK_Boss::AK_Boss()
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
+	InitializeComponents ();
+
+	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
+	AIControllerClass = AK_BossAIController::StaticClass ();
+
+	statusComp = CreateDefaultSubobject<UK_StatusComp> ( TEXT ( "StatusComp" ) );
+	
+	bossAnimStates.bIsAttack = false;
+	bossAnimStates.actionName = NAME_None;
+}
+
+void AK_Boss::InitializeComponents ()
+{
+	//Capsule Component & Movement Component Setup
 	UCapsuleComponent* bossCapsuleComp = GetCapsuleComponent ();
 	UCharacterMovementComponent* bossMovementComp = GetCharacterMovement ();
-	if(bossCapsuleComp && bossMovementComp)
+	if (bossCapsuleComp && bossMovementComp)
 	{
 		bossCapsuleComp->InitCapsuleSize ( 55.f , 96.f );
 		bossCapsuleComp->SetRelativeLocation ( FVector ( 0.f , 0.f , 96.f ) );
@@ -36,8 +52,9 @@ AK_Boss::AK_Boss()
 		bossMovementComp->RotationRate = FRotator ( 0.f , 360.f , 0.f );
 	}
 
+	//Skeletal Mesh Setup
 	static ConstructorHelpers::FObjectFinder<USkeletalMesh> tempMesh ( TEXT ( "/Script/Engine.SkeletalMesh'/Game/Assets/Character/Mixamo/X_Bot.X_Bot'" ) );
-	if(tempMesh.Succeeded())
+	if (tempMesh.Succeeded ())
 	{
 		GetMesh ()->SetSkeletalMesh ( tempMesh.Object );
 		GetMesh ()->SetRelativeLocation ( FVector ( 0.f , 0.f , -96.f ) );
@@ -46,13 +63,14 @@ AK_Boss::AK_Boss()
 		GetMesh ()->SetCollisionResponseToChannel ( ECC_Camera , ECR_Ignore );
 	}
 
+	//Animation Blueprint Setup
 	static ConstructorHelpers::FClassFinder<UAnimInstance> tempABP ( TEXT ( "/Script/Engine.AnimBlueprint'/Game/Blueprints/Boss/ABP_Boss.ABP_Boss_C'" ) );
 	if (tempABP.Succeeded ())
 	{
 		GetMesh ()->SetAnimInstanceClass ( tempABP.Class );
 	}
 
-
+	//Katana Mesh Setup
 	katanaMeshComp = CreateDefaultSubobject<UStaticMeshComponent> ( TEXT ( "KatanaMeshComp" ) );
 	katanaMeshComp->SetupAttachment ( GetMesh () , TEXT ( "RightHandSocketSheath" ) );
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> tempKatanaMesh ( TEXT ( "/Game/Assets/Character/GhostSamurai_Bundle/GhostSamurai/Weapon/Mesh/Katana/SM_Katana01.SM_Katana01" ) );
@@ -66,14 +84,16 @@ AK_Boss::AK_Boss()
 		katanaMeshComp->SetGenerateOverlapEvents ( false );
 	}
 
-
-	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
-	AIControllerClass = AK_BossAIController::StaticClass ();
-
-	statusComp = CreateDefaultSubobject<UK_StatusComp> ( TEXT ( "StatusComp" ) );
-	
-	bossAnimStates.bIsAttack = false;
-	bossAnimStates.actionName = NAME_None;
+	//Boss HP Widget Setup
+	bossHPUIComp = CreateDefaultSubobject<UWidgetComponent> ( TEXT ( "BossHPWidget" ) );
+	bossHPUIComp->SetupAttachment ( GetRootComponent () );
+	ConstructorHelpers::FClassFinder<UBossHPWidget> tempHPUI ( TEXT ( "/Script/UMGEditor.WidgetBlueprint'/Game/UI/WBP_BossHPUI.WBP_BossHPUI_C'" ) );
+	if (tempHPUI.Succeeded ())
+	{
+		bossHPUIComp->SetWidgetClass ( tempHPUI.Class );
+		bossHPUIComp->SetDrawSize ( FVector2D ( 150.f , 20.f ) );
+		bossHPUIComp->SetRelativeLocation ( FVector ( 0.f , 0.f , 150.f ) );
+	}
 }
 
 // Called when the game starts or when spawnedㄴ
@@ -87,6 +107,13 @@ void AK_Boss::BeginPlay()
 	if (statusComp)
 	{
 		statusComp->OnDeathDel.AddDynamic ( this , &AK_Boss::OnBossDeath );
+	}
+
+	bossHPUI = Cast<UBossHPWidget> ( bossHPUIComp->GetUserWidgetObject () );
+	if (bossHPUI)
+	{
+		float maxHP = statusComp->GetMaxHealth ();
+		bossHPUI->SetHPPercent ( maxHP , maxHP );
 	}
 
 	BindAnimDelegateActions ();
@@ -134,12 +161,26 @@ void AK_Boss::BindAnimDelegateActions ()
 	}
 }
 
+
 // Called every frame
 void AK_Boss::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	BillboardBossHPUIToCamera ();
 }
+
+void AK_Boss::BillboardBossHPUIToCamera ()
+{
+	FVector targetLoc = GetWorld ()->GetFirstPlayerController ()->PlayerCameraManager->GetCameraLocation ();
+	FVector dir = targetLoc - bossHPUIComp->GetComponentLocation ();
+	dir.Normalize ();
+
+	FRotator rot = dir.ToOrientationRotator ();
+
+	bossHPUIComp->SetWorldRotation ( rot );
+}
+
 
 float AK_Boss::TakeDamage ( float DamageAmount , FDamageEvent const& DamageEvent , AController* EventInstigator , AActor* DamageCauser )
 {
@@ -151,7 +192,19 @@ float AK_Boss::TakeDamage ( float DamageAmount , FDamageEvent const& DamageEvent
 		return 0.f;
 	}
 
-	return statusComp->TakeDamage ( DamageAmount );
+	float calculatedDamage = statusComp->TakeDamage ( DamageAmount );
+	
+	if (!bossHPUI)
+	{
+		UE_LOG ( LogTemp , Warning , TEXT ( "No Boss HP UI found!" ) );
+		return 0.f;
+	}
+
+	float currentHP = statusComp->GetCurrentHealth ();
+	float maxHP = statusComp->GetMaxHealth ();
+	bossHPUI->SetHPPercent ( currentHP , maxHP );
+
+	return calculatedDamage;
 }
 
 void AK_Boss::ReqeustAttack(const FName& attackName)
@@ -165,7 +218,7 @@ void AK_Boss::ReqeustAttack(const FName& attackName)
 
 	bossAnim->PlayBossAttackMontage ( attackName );
 
-	UE_LOG ( LogTemp , Warning , TEXT ( "Boss Request Attack: %s" ) , *attackName.ToString () );
+	//UE_LOG ( LogTemp , Warning , TEXT ( "Boss Request Attack: %s" ) , *attackName.ToString () );
 }
 
 float AK_Boss::GetBossAttackRange () const

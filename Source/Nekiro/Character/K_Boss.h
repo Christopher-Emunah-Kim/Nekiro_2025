@@ -19,6 +19,7 @@ class UK_ActionComp;
 class UK_StatusComp;
 class UK_MovementData;
 class UK_CombatData;
+class UWidgetComponent;
 
 UCLASS()
 class NEKIRO_API AK_Boss : public ACharacter
@@ -31,7 +32,9 @@ public:
 protected:
 	virtual void BeginPlay() override;
 
+	void InitializeComponents ();
 	void BindAnimDelegateActions ();
+	void BillboardBossHPUIToCamera ();
 
 	UFUNCTION()
 	void OnBossStateChanged (FName actionName , bool bIsActive );
@@ -96,5 +99,9 @@ protected:
 	UPROPERTY ( EditDefaultsOnly , BlueprintReadOnly , Category = "NEKIRO|DataAssets" , meta = (AllowPrivateAccess = "true" , ToolTip = "Boss Combat Data Asset") )
 	UK_CombatData* bossCombatData;
 
+	UPROPERTY ( VisibleAnywhere , BlueprintReadOnly , Category = "NEKIRO|UI" , meta = ( AllowPrivateAccess = "true" ) )
+	UWidgetComponent* bossHPUIComp;
 
+	UPROPERTY ( VisibleAnywhere , BlueprintReadOnly , Category = "NEKIRO|UI" , meta = (AllowPrivateAccess = "true") )
+	class UBossHPWidget* bossHPUI;
 };
