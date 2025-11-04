@@ -167,21 +167,24 @@ void UK_PlayerAnim::CalculateSpeedAndDirection ( float DeltaSeconds )
 	}
 
 	const float followRate = 8.f;
-	static float smoothSpeed = 0.f;
 	smoothSpeed = FMath::FInterpTo ( smoothSpeed , rawSpeed , DeltaSeconds , followRate );
 
 	m_playerAnimStates.speed = FMath::Clamp ( smoothSpeed , 0.f , maxSpeed );
 
-	static FRotator smoothRot = FRotator::ZeroRotator;
 	FRotator targetRot = smoothRot;
 
 	if (rawSpeed > 0.f)
 	{
 		const FVector rawDir = rawVel.GetSafeNormal2D ();
 		targetRot = FRotationMatrix::MakeFromX ( rawDir ).Rotator ();
+
+		float deltaYaw = FMath::FindDeltaAngleDegrees ( smoothRot.Yaw , targetRot.Yaw );
+		targetRot.Yaw = smoothRot.Yaw + deltaYaw;
 	}
 
 	smoothRot = FMath::RInterpTo ( smoothRot , targetRot , DeltaSeconds , followRate );
+	smoothRot.Yaw = FMath::UnwindDegrees ( smoothRot.Yaw );
+
 	m_playerAnimStates.direction = FRotator::NormalizeAxis ( smoothRot.Yaw );
 }
 

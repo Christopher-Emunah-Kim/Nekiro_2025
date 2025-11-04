@@ -365,7 +365,7 @@ void AK_Player::OnLockOnStateChanged ( bool bIsLockOnParam , AK_Boss* targetBoss
 {
 	if (bIsLockOnParam)
 	{
-		bUseControllerRotationYaw = false;
+		//bUseControllerRotationYaw = false;
 		GetCharacterMovement ()->bOrientRotationToMovement = true;
 
 		UE_LOG ( LogTemp , Warning , TEXT ( "Player Lock-On Enabled" ) );

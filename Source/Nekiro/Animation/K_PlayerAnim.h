@@ -59,4 +59,6 @@ protected:
 
 	TArray<FName> attackSectionNames;
 
+	float smoothSpeed = 0.f;
+	FRotator smoothRot = FRotator::ZeroRotator;
 };
