@@ -23,16 +23,19 @@ void UK_BossAnim::NativeUpdateAnimation ( float DeltaSeconds )
 	Super::NativeUpdateAnimation ( DeltaSeconds );
 	// Update logic here
 
-	CacheBossCharacter ();
+	if (!bossCharacter.IsValid ())
+	{
+		CacheBossCharacter ();
+	}
 
-	if (bossAnimStates.bIsDead)
+	if(!bossCharacter.IsValid())
 	{
 		bossAnimStates.bossSpeed = 0.f;
 		bossAnimStates.bIsFalling = false;
 		return;
 	}
 
-	if(!bossCharacter.IsValid())
+	if (bossAnimStates.bIsDead)
 	{
 		bossAnimStates.bossSpeed = 0.f;
 		bossAnimStates.bIsFalling = false;
@@ -44,6 +47,10 @@ void UK_BossAnim::NativeUpdateAnimation ( float DeltaSeconds )
 	{
 		bossAnimStates.bossSpeed = bossCharacter->GetVelocity ().Size2D ();
 		bossAnimStates.bIsFalling = movementComp->IsFalling ();
+		if (bossAnimStates.bossSpeed > 200.f)
+		{
+			int a = 0;
+		}
 	}
 }
 
@@ -57,11 +64,24 @@ void UK_BossAnim::CacheBossCharacter ()
 	APawn* pawnOwner = TryGetPawnOwner ();
 	if (pawnOwner)
 	{
+		UE_LOG ( LogTemp , Warning , TEXT ( "PawnOwner: %s, Class: %s" ) ,
+			*pawnOwner->GetName () ,
+			*pawnOwner->GetClass ()->GetName () );
+
 		AK_Boss* castedBoss = Cast<AK_Boss> ( pawnOwner );
 		if (castedBoss)
 		{
 			bossCharacter = castedBoss;
+			UE_LOG ( LogTemp , Warning , TEXT ( "Boss Character Cached Successfully!" ) );
 		}
+		else
+		{
+			UE_LOG ( LogTemp , Error , TEXT ( "Failed to cast PawnOwner to AK_Boss!" ) );
+		}
+	}
+	else
+	{
+		UE_LOG ( LogTemp , Error , TEXT ( "PawnOwner is null!" ) );
 	}
 }
 

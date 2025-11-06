@@ -66,11 +66,11 @@ void AK_Boss::InitializeComponents ()
 
 	//Animation Blueprint Setup
 	//static ConstructorHelpers::FClassFinder<UAnimInstance> tempABP ( TEXT ( "/Script/Engine.AnimBlueprint'/Game/Blueprints/Boss/ABP_Boss.ABP_Boss_C'" ) );
-	static ConstructorHelpers::FClassFinder<UAnimInstance> tempABP ( TEXT ( "/Script/Engine.AnimBlueprint'/Game/Blueprints/Boss/ABP_RetargetedBoss.ABP_RetargetedBoss_C'" ) );
+	/*static ConstructorHelpers::FClassFinder<UAnimInstance> tempABP ( TEXT ( "/Script/Engine.AnimBlueprint'/Game/Blueprints/Boss/ABP_RetargetedBoss.ABP_RetargetedBoss_C'" ) );
 	if (tempABP.Succeeded ())
 	{
 		GetMesh ()->SetAnimInstanceClass ( tempABP.Class );
-	}
+	}*/
 
 	//Katana Mesh Setup
 	katanaMeshComp = CreateDefaultSubobject<UStaticMeshComponent> ( TEXT ( "KatanaMeshComp" ) );
@@ -192,7 +192,7 @@ void AK_Boss::BillboardBossHPUIToCamera ()
 
 float AK_Boss::TakeDamage ( float DamageAmount , FDamageEvent const& DamageEvent , AController* EventInstigator , AActor* DamageCauser )
 {
-	if (bIsBossDead)
+	if (bossAnimStates.bIsDead)
 	{
 		return 0.f;
 	}
@@ -229,7 +229,7 @@ void AK_Boss::ReqeustAttack(const FName& attackName)
 		return;
 	}
 
-	if (bIsBossDead)
+	if (bossAnimStates.bIsDead)
 	{
 		return;
 	}
@@ -248,7 +248,7 @@ float AK_Boss::GetBossAttackRange () const
 
 void AK_Boss::PerformAttack ( )
 {
-	if (bIsBossDead)
+	if (bossAnimStates.bIsDead)
 	{
 		return;
 	}
@@ -327,12 +327,12 @@ void AK_Boss::OnBossDeath ()
 {
 	UE_LOG ( LogTemp , Warning , TEXT ( "Boss Death Function Called!" ) );
 
-	if (bIsBossDead)
+	if (bossAnimStates.bIsDead)
 	{
 		return;
 	}
 
-	bIsBossDead = true;
+	bossAnimStates.bIsDead = true;
 
 	AK_BossAIController* bossAIController = Cast<AK_BossAIController> ( GetController () );
 	if (bossAIController)
