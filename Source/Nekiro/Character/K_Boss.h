@@ -74,6 +74,7 @@ public:
 	UStaticMeshComponent* GetKatanaMeshComp () const { return katanaMeshComp; }
 
 protected:
+
 	//AI
 	UPROPERTY ( EditDefaultsOnly , BlueprintReadOnly , Category = "NEKIRO|BT" , meta = (AllowPrivateAccess = "true") )
 	UBehaviorTree* bossBehaviorTree;

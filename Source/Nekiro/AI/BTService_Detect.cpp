@@ -71,8 +71,8 @@ void UBTService_Detect::PerformDetect ( UBehaviorTreeComponent& OwnerComp  )
 			OwnerComp.GetBlackboardComponent ()->SetValueAsObject ( AK_BossAIController::targetActorKey , player );
 
 			//DrawDebugSphere ( world , pawnLocation , detectRadius , 16 , FColor::Green , false , Interval );
-			DrawDebugPoint ( world , player->GetActorLocation () , 10.0f , FColor::Blue , false , Interval );
-			DrawDebugLine ( world , pawnLocation , player->GetActorLocation () , FColor::Blue , false , Interval );
+			//DrawDebugPoint ( world , player->GetActorLocation () , 10.0f , FColor::Blue , false , Interval );
+			//DrawDebugLine ( world , pawnLocation , player->GetActorLocation () , FColor::Blue , false , Interval );
 
 			break;
 		}

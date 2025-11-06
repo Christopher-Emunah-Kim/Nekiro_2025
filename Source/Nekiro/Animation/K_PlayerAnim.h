@@ -43,6 +43,9 @@ public:
 	UFUNCTION()
 	void AnimNotify_NextAttackCheck ();
 
+	void PlayDeathMontage ();
+	void SetIsDead ( bool bDead );
+
 	void SetPlayerCharacter ( class AK_Player& player );
 	void SetIsCrouch ( bool bCrouch ) { m_playerAnimStates.bIsCrouch = bCrouch; }
 	bool GetIsCrouch () { return m_playerAnimStates.bIsCrouch; }
@@ -56,6 +59,9 @@ protected:
 
 	UPROPERTY ( EditAnywhere , BlueprintReadWrite , Category = "NEKIRO|Animation" )
 	class UAnimMontage* attackMontage;
+
+	UPROPERTY ( EditAnywhere , BlueprintReadWrite , Category = "NEKIRO|Animation" )
+	class UAnimMontage* deathMontage;
 
 	TArray<FName> attackSectionNames;
 

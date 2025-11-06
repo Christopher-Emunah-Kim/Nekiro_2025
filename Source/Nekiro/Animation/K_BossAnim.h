@@ -45,6 +45,9 @@ public:
 	UFUNCTION()
 	void AnimNotify_NSBossAttack ();
 
+	void PlayBossDeathMontage ();
+	void SetIsBossDead ( bool bDead );
+
 private:
 	TWeakObjectPtr<class AK_Boss> bossCharacter;
 
@@ -54,5 +57,8 @@ protected:
 
 	UPROPERTY ( EditAnywhere , BlueprintReadWrite , Category = "NEKIRO|Boss|Animation" )
 	UAnimMontage* attackMontage;
+
+	UPROPERTY ( EditAnywhere , BlueprintReadWrite , Category = "NEKIRO|Boss|Animation" )
+	UAnimMontage* deathMontage;
 
 };

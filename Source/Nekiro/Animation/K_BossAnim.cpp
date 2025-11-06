@@ -25,11 +25,17 @@ void UK_BossAnim::NativeUpdateAnimation ( float DeltaSeconds )
 
 	CacheBossCharacter ();
 
+	if (bossAnimStates.bIsDead)
+	{
+		bossAnimStates.bossSpeed = 0.f;
+		bossAnimStates.bIsFalling = false;
+		return;
+	}
+
 	if(!bossCharacter.IsValid())
 	{
 		bossAnimStates.bossSpeed = 0.f;
 		bossAnimStates.bIsFalling = false;
-		bossAnimStates.bIsDead = true;
 		return;
 	}
 
@@ -113,4 +119,35 @@ void UK_BossAnim::AnimNotify_NSBossAttack ()
 	bossCharacter->PerformAttack ();
 
 	UE_LOG ( LogTemp , Warning , TEXT ( "Boss Attack Notify Triggered!" ) );
+}
+
+void UK_BossAnim::PlayBossDeathMontage ()
+{
+	if (!bossCharacter.IsValid ())
+	{
+		return;
+	}
+
+	if(!deathMontage)
+	{
+		UE_LOG ( LogTemp , Warning , TEXT ( "No Death Montage found!" ) );
+		return;
+	}
+
+	Montage_Stop ( 0.2f );
+	Montage_Play ( deathMontage , 1.f );
+}
+
+void UK_BossAnim::SetIsBossDead ( bool bDead )
+{
+	bossAnimStates.bIsDead = bDead;
+	if (bDead)
+	{
+		bossAnimStates.bIsAttack = false;
+		bossAnimStates.movementState = EBossMovementState::IDLE;
+		bossAnimStates.combatState = EBossCombatState::None;
+		bossAnimStates.bossSpeed = 0.f;
+		bossAnimStates.bIsFalling = false;
+		bossAnimStates.actionName = NAME_None;
+	}
 }

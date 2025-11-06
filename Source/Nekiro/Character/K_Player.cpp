@@ -19,6 +19,7 @@
 #include "Nekiro/Components/K_StatusComp.h"
 #include "Nekiro/Components/K_ActionComp.h"
 #include "Nekiro/UI/K_MainHUDUI.h"
+#include "Nekiro/UI/K_ResultWidget.h"
 #include "K_Boss.h"
 
 // Sets default values
@@ -205,6 +206,11 @@ void AK_Player::SetupPlayerInputComponent ( UInputComponent* PlayerInputComponen
 
 float AK_Player::TakeDamage ( float DamageAmount , FDamageEvent const& DamageEvent , AController* EventInstigator , AActor* DamageCauser )
 {
+	if (bIsPlayerDead)
+	{
+		return 0.f;
+	}
+
 	Super::TakeDamage ( DamageAmount , DamageEvent , EventInstigator , DamageCauser );
 
 	if (!statusComp)
@@ -431,13 +437,69 @@ void AK_Player::OnPlayerDeath ()
 {
 	UE_LOG ( LogTemp , Warning , TEXT ( "Player Death Function Called" ) );
 
+	if(bIsPlayerDead)
+	{
+		return;
+	}
+	bIsPlayerDead = true;
+
 	DisableInput ( Cast<APlayerController> ( GetController () ) );
 	GetCapsuleComponent()->SetCollisionEnabled (ECollisionEnabled::NoCollision);
+	GetCharacterMovement ()->DisableMovement ();
 
 	if (playerAnim)
 	{
-		//playerAnim->PlayDeathMontage ();
+		playerAnim->PlayDeathMontage ();
+		playerAnim->SetIsDead ( true );
 	}
 
 	//TODO : GameOver UI
+	ShowResultUI(false);
+
+}
+
+void AK_Player::ShowResultUI( bool bIsPlayerVictory )
+{
+	APlayerController* pc = Cast<APlayerController> ( GetController () );
+
+	if (!pc || !resultUIFactory)
+	{
+		UE_LOG ( LogTemp , Warning , TEXT ( "No Player Controller or Result UI Factory found!" ) );
+		return;
+	}
+
+	if(!resultUI)
+	{
+		resultUI = CreateWidget<UUserWidget> ( pc , resultUIFactory );
+	}
+
+	if(!resultUI)
+	{
+		UE_LOG ( LogTemp , Error , TEXT ( "Failed to create Result UI" ) );
+		return;
+	}
+
+	resultUI->AddToViewport (10);
+	UE_LOG ( LogTemp , Log , TEXT ( "Result UI created successfully" ) );
+
+	FInputModeUIOnly inputMode;
+	inputMode.SetWidgetToFocus ( resultUI->TakeWidget () );
+	inputMode.SetLockMouseToViewportBehavior ( EMouseLockMode::DoNotLock );
+	pc->SetInputMode ( inputMode );
+	pc->bShowMouseCursor = true;
+
+	UGameplayStatics::SetGamePaused ( GetWorld () , true );
+	
+	UK_ResultWidget* result = Cast<UK_ResultWidget> ( resultUI );
+	if(result)
+	{
+		if (bIsPlayerVictory)
+		{
+			result->ShowResult( EResultState::Victory );
+		}
+		else
+		{
+			result->ShowResult( EResultState::Defeat );
+		}
+	}
 }

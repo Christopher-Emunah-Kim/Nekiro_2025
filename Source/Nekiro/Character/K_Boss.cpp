@@ -124,6 +124,11 @@ void AK_Boss::BeginPlay()
 
 void AK_Boss::OnBossStateChanged (FName actionName , bool bIsActive )
 {
+	if(bossAnimStates.bIsDead)
+	{
+		return;
+	}
+
 	bossAnimStates.bIsAttack = bIsActive;
 	if (bIsActive == true)
 	{
@@ -187,6 +192,11 @@ void AK_Boss::BillboardBossHPUIToCamera ()
 
 float AK_Boss::TakeDamage ( float DamageAmount , FDamageEvent const& DamageEvent , AController* EventInstigator , AActor* DamageCauser )
 {
+	if (bIsBossDead)
+	{
+		return 0.f;
+	}
+
 	Super::TakeDamage ( DamageAmount , DamageEvent , EventInstigator , DamageCauser );
 
 	if (!statusComp)
@@ -218,6 +228,12 @@ void AK_Boss::ReqeustAttack(const FName& attackName)
 	{
 		return;
 	}
+
+	if (bIsBossDead)
+	{
+		return;
+	}
+
 	currentAttackHitActors.Empty ();
 
 	bossAnim->PlayBossAttackMontage ( attackName );
@@ -232,6 +248,11 @@ float AK_Boss::GetBossAttackRange () const
 
 void AK_Boss::PerformAttack ( )
 {
+	if (bIsBossDead)
+	{
+		return;
+	}
+
 	if(!katanaMeshComp)
 	{
 		return;
@@ -306,6 +327,13 @@ void AK_Boss::OnBossDeath ()
 {
 	UE_LOG ( LogTemp , Warning , TEXT ( "Boss Death Function Called!" ) );
 
+	if (bIsBossDead)
+	{
+		return;
+	}
+
+	bIsBossDead = true;
+
 	AK_BossAIController* bossAIController = Cast<AK_BossAIController> ( GetController () );
 	if (bossAIController)
 	{
@@ -314,12 +342,19 @@ void AK_Boss::OnBossDeath ()
 	}
 
 	GetCapsuleComponent ()->SetCollisionEnabled ( ECollisionEnabled::NoCollision );
+	GetCharacterMovement ()->DisableMovement ();
 
 	//Anim
 	if (bossAnim)
 	{
-		//bossAnim->PlayBossDeathMontage ();
+		bossAnim->SetIsBossDead ( true );
+		bossAnim->PlayBossDeathMontage ();
 	}
 
 	//TODO : Death Logic (Ragdoll , Destroy Actor after delay, Rewards, UI , etc)
+	AK_Player* player = Cast<AK_Player> ( UGameplayStatics::GetPlayerCharacter ( GetWorld () , 0 ) );
+	if (player)
+	{
+		player->ShowResultUI ( true );
+	}
 }

@@ -24,6 +24,11 @@ void UK_PlayerAnim::NativeUpdateAnimation ( float DeltaSeconds )
 		}
 	}
 
+	if(m_playerAnimStates.bIsDead)
+	{
+		return;
+	}
+
 	UpdateAnimStates (DeltaSeconds);
 	CheckComboAttackSections ();
 
@@ -32,7 +37,6 @@ void UK_PlayerAnim::NativeUpdateAnimation ( float DeltaSeconds )
 void UK_PlayerAnim::UpdateAnimStates ( float DeltaSeconds )
 {
 	CalculateSpeedAndDirection ( DeltaSeconds );
-
 	CheckPlayerStates ();
 }
 
@@ -147,6 +151,32 @@ void UK_PlayerAnim::AnimNotify_NextAttackCheck ()
 	}
 }
 
+void UK_PlayerAnim::PlayDeathMontage ()
+{
+	if(!deathMontage)
+	{
+		UE_LOG ( LogTemp , Warning , TEXT ( "DeathMontage is nullptr!" ) );
+		return;
+	}
+
+	Montage_Stop ( 0.2f );
+	Montage_Play ( deathMontage , 1.f );
+}
+
+void UK_PlayerAnim::SetIsDead ( bool bDead )
+{
+	m_playerAnimStates.bIsDead = bDead;
+	if (bDead)
+	{
+		m_playerAnimStates.bIsAttack = false;
+		m_playerAnimStates.bIsGuard = false;
+		m_playerAnimStates.bIsDash = false;
+		m_playerAnimStates.movementState = EPlayerMovementState::IDLE;
+		m_playerAnimStates.combatState = EPlayerCombatState::None;
+		m_playerAnimStates.speed = 0.f;
+		m_playerAnimStates.direction = 0.f;
+	}
+}
 
 void UK_PlayerAnim::CalculateSpeedAndDirection ( float DeltaSeconds )
 {

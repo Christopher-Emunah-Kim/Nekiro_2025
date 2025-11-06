@@ -55,6 +55,7 @@ public:
 
 
 	void SetWeaponCollision ( bool bEnable );
+	void ShowResultUI ( bool bIsPlayerVictory );
 
 	//Delegate Functions
 	UFUNCTION()
@@ -82,7 +83,9 @@ public:
 
 
 private:
-	UPROPERTY ( VisibleAnywhere , BlueprintReadOnly , Category = "NEKIRO|Settings" , meta = (AllowPrivateAccess = "true") )
+	bool bIsPlayerDead = false;
+
+	UPROPERTY ( EditDefaultsOnly , BlueprintReadOnly , Category = "NEKIRO|Settings" , meta = (AllowPrivateAccess = "true") )
 	float mouseSensitivity = 0.3f;
 
 	UPROPERTY ( VisibleAnywhere , BlueprintReadOnly , Category = "NEKIRO|Weapons" , meta = (AllowPrivateAccess = "true") )
@@ -100,6 +103,12 @@ private:
 
 	UPROPERTY()
 	class UUserWidget* playerHUDUI;
+
+	UPROPERTY ( EditDefaultsOnly , BlueprintReadOnly , Category = "NEKIRO|UI" , meta = (AllowPrivateAccess = "true") )
+	TSubclassOf<class UUserWidget> resultUIFactory;
+
+	UPROPERTY ()
+	class UUserWidget* resultUI;
 
 	//Components
 	UPROPERTY ( VisibleAnywhere , BlueprintReadOnly , Category = "NEKIRO|Components" , meta = (AllowPrivateAccess = "true") )
