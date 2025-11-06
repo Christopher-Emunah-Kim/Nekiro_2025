@@ -277,11 +277,16 @@ void UK_ActionComp::StartLockOn ()
 	ignoreActors.Add ( player );
 
 	FHitResult outHit;
-	bool bIsHit = UKismetSystemLibrary::SphereTraceSingleForObjects ( GetWorld () , 
+	/*bool bIsHit = UKismetSystemLibrary::SphereTraceSingleForObjects ( GetWorld () , 
 		start , end , 30.f , 
 		objectTypes , false , ignoreActors , 
 		EDrawDebugTrace::ForDuration , outHit , true,
-		FLinearColor::Red, FLinearColor::Green, 2.0f);
+		FLinearColor::Red, FLinearColor::Green, 2.0f);*/
+
+	bool bIsHit = UKismetSystemLibrary::SphereTraceSingleForObjects ( GetWorld () ,
+		start , end , 30.f ,
+		objectTypes , false , ignoreActors ,
+		EDrawDebugTrace::None , outHit , true );
 
 	if (bIsHit)
 	{
