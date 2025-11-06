@@ -53,7 +53,8 @@ void AK_Boss::InitializeComponents ()
 	}
 
 	//Skeletal Mesh Setup
-	static ConstructorHelpers::FObjectFinder<USkeletalMesh> tempMesh ( TEXT ( "/Script/Engine.SkeletalMesh'/Game/Assets/Character/Mixamo/X_Bot.X_Bot'" ) );
+	//static ConstructorHelpers::FObjectFinder<USkeletalMesh> tempMesh ( TEXT ( "/Script/Engine.SkeletalMesh'/Game/Assets/Character/Mixamo/X_Bot.X_Bot'" ) );
+	static ConstructorHelpers::FObjectFinder<USkeletalMesh> tempMesh ( TEXT ( "/Script/Engine.SkeletalMesh'/Game/Assets/Character/Assassin/Mesh/SK_Assassin.SK_Assassin'" ) );
 	if (tempMesh.Succeeded ())
 	{
 		GetMesh ()->SetSkeletalMesh ( tempMesh.Object );
@@ -64,7 +65,8 @@ void AK_Boss::InitializeComponents ()
 	}
 
 	//Animation Blueprint Setup
-	static ConstructorHelpers::FClassFinder<UAnimInstance> tempABP ( TEXT ( "/Script/Engine.AnimBlueprint'/Game/Blueprints/Boss/ABP_Boss.ABP_Boss_C'" ) );
+	//static ConstructorHelpers::FClassFinder<UAnimInstance> tempABP ( TEXT ( "/Script/Engine.AnimBlueprint'/Game/Blueprints/Boss/ABP_Boss.ABP_Boss_C'" ) );
+	static ConstructorHelpers::FClassFinder<UAnimInstance> tempABP ( TEXT ( "/Script/Engine.AnimBlueprint'/Game/Blueprints/Boss/ABP_RetargetedBoss.ABP_RetargetedBoss_C'" ) );
 	if (tempABP.Succeeded ())
 	{
 		GetMesh ()->SetAnimInstanceClass ( tempABP.Class );
@@ -72,7 +74,8 @@ void AK_Boss::InitializeComponents ()
 
 	//Katana Mesh Setup
 	katanaMeshComp = CreateDefaultSubobject<UStaticMeshComponent> ( TEXT ( "KatanaMeshComp" ) );
-	katanaMeshComp->SetupAttachment ( GetMesh () , TEXT ( "RightHandSocketSheath" ) );
+	//katanaMeshComp->SetupAttachment ( GetMesh () , TEXT ( "RightHandSocketSheath" ) );
+	katanaMeshComp->SetupAttachment ( GetMesh () , TEXT ( "KatanaEquippedSocket" ) );
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> tempKatanaMesh ( TEXT ( "/Game/Assets/Character/GhostSamurai_Bundle/GhostSamurai/Weapon/Mesh/Katana/SM_Katana01.SM_Katana01" ) );
 	if (tempKatanaMesh.Succeeded ())
 	{

@@ -73,6 +73,7 @@ public:
 	UPROPERTY ( EditAnywhere, BlueprintReadOnly, Category = "NEKIRO|Movement|Boss", meta = ( ClampMin = "0.0"))
 	float BOSS_WALK_SPEED = 180.0f;
 
+
 	UPROPERTY ( EditAnywhere , BlueprintReadOnly , Category = "NEKIRO|Movement|Boss" , meta = (ClampMin = "0.0") )
 	float BOSS_RUN_SPEED = 500.0f;
 
