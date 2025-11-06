@@ -453,9 +453,6 @@ void AK_Player::OnPlayerDeath ()
 		playerAnim->SetIsDead ( true );
 	}
 
-	//TODO : GameOver UI
-	ShowResultUI(false);
-
 }
 
 void AK_Player::ShowResultUI( bool bIsPlayerVictory )

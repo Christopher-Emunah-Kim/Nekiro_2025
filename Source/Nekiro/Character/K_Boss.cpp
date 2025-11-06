@@ -351,10 +351,4 @@ void AK_Boss::OnBossDeath ()
 		bossAnim->PlayBossDeathMontage ();
 	}
 
-	//TODO : Death Logic (Ragdoll , Destroy Actor after delay, Rewards, UI , etc)
-	AK_Player* player = Cast<AK_Player> ( UGameplayStatics::GetPlayerCharacter ( GetWorld () , 0 ) );
-	if (player)
-	{
-		player->ShowResultUI ( true );
-	}
 }

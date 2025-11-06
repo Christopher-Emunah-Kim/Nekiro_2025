@@ -3,7 +3,12 @@
 
 #include "K_BossAnim.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "GameFramework/Pawn.h"
+
 #include "NEKIRO/Character/K_Boss.h"
+#include "Nekiro/Character/K_Player.h"
+
+#include <Kismet/GameplayStatics.h>
 
 
 UK_BossAnim::UK_BossAnim ()
@@ -94,6 +99,15 @@ void UK_BossAnim::HandleMontageEnded ( UAnimMontage* montage , bool bInterrupted
 	{
 		OnBossAttackAnimEndDel.Broadcast ();
 	}
+
+	if(montage == deathMontage)
+	{
+		AK_Player* player = Cast<AK_Player> ( UGameplayStatics::GetPlayerCharacter ( GetWorld () , 0 ) );
+		if (player)
+		{
+			player->ShowResultUI ( true );
+		}
+	}
 }
 
 
@@ -156,6 +170,12 @@ void UK_BossAnim::PlayBossDeathMontage ()
 
 	Montage_Stop ( 0.2f );
 	Montage_Play ( deathMontage , 1.f );
+	Montage_JumpToSection ( FName("RemoveLife") , deathMontage );
+	
+
+	FOnMontageEnded endDelegate;
+	endDelegate.BindUObject ( this , &UK_BossAnim::HandleMontageEnded );
+	Montage_SetEndDelegate ( endDelegate , deathMontage );
 }
 
 void UK_BossAnim::SetIsBossDead ( bool bDead )

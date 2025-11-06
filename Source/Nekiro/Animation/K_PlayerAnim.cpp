@@ -118,6 +118,16 @@ void UK_PlayerAnim::OnAttackMontageEnded ( UAnimMontage* Montage , bool bInterru
 	}
 }
 
+void UK_PlayerAnim::OnDeathMontageEnded ( UAnimMontage* Montage , bool bInterrupted )
+{
+	if(Montage != deathMontage)
+	{
+		return;
+	}
+
+	m_player->ShowResultUI ( false );
+}
+
 void UK_PlayerAnim::AnimNotify_AttackHitCheck ()
 {
 	//UE_LOG ( LogTemp , Warning , TEXT ( "UK_PlayerAnim::AnimNotify_AttackHitCheck called." ) );
@@ -161,6 +171,10 @@ void UK_PlayerAnim::PlayDeathMontage ()
 
 	Montage_Stop ( 0.2f );
 	Montage_Play ( deathMontage , 1.f );
+
+	FOnMontageEnded endDelegate;
+	endDelegate.BindUObject ( this , &UK_PlayerAnim::OnDeathMontageEnded );
+	Montage_SetEndDelegate ( endDelegate , deathMontage );
 }
 
 void UK_PlayerAnim::SetIsDead ( bool bDead )

@@ -33,7 +33,7 @@ void UK_ResultWidget::NativeConstruct ()
 	{
 		FWidgetAnimationDynamicEvent animFinishedDel;
 		animFinishedDel.BindDynamic ( this , &UK_ResultWidget::HandleAnimFinished );
-		BindToAnimationFinished ( VictoryAnim , animFinishedDel );
+		BindToAnimationFinished ( DefeatAnim , animFinishedDel );
 	}
 
 }

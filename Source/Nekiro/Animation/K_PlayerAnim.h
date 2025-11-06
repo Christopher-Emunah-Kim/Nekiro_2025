@@ -36,6 +36,7 @@ public:
 	void ExitAttackState ();
 
 	void OnAttackMontageEnded ( UAnimMontage* Montage , bool bInterrupted );
+	void OnDeathMontageEnded ( UAnimMontage* Montage , bool bInterrupted );
 
 	UFUNCTION()
 	void AnimNotify_AttackHitCheck ();
