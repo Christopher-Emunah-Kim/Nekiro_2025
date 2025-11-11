@@ -216,14 +216,17 @@ void UK_PlayerAnim::CalculateSpeedAndDirection ( float DeltaSeconds )
 	const FVector rawVel = m_player->GetActorTransform ().InverseTransformVectorNoScale ( vel );
 	float rawSpeed = rawVel.Size ();
 
-	const float deadZone = 3.f;
-	if (rawSpeed < deadZone)
-	{
-		rawSpeed = 0.f;
-	}
-
 	const float followRate = 8.f;
 	smoothSpeed = FMath::FInterpTo ( smoothSpeed , rawSpeed , DeltaSeconds , followRate );
+
+	const float deadZone = 20.f;
+	if(smoothSpeed < deadZone)
+	{
+		smoothSpeed = 0.f;
+		m_playerAnimStates.speed = 0.f;
+		m_playerAnimStates.direction = 0.f;
+		return;
+	}
 
 	m_playerAnimStates.speed = FMath::Clamp ( smoothSpeed , 0.f , maxSpeed );
 

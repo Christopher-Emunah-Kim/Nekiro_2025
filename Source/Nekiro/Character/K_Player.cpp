@@ -262,11 +262,6 @@ void AK_Player::OnPlayerJump ()
 
 void AK_Player::OnPlayerDash ( const FInputActionValue& value )
 {
-	if(playerAnim && !playerAnim->GetIsCrouch ())
-	{
-		playerAnim->PlayDashMontage ();
-	}
-
 	FVector dashDirection = GetLastMovementInputVector ();
 	if(dashDirection.IsNearlyZero ())
 	{
@@ -276,6 +271,11 @@ void AK_Player::OnPlayerDash ( const FInputActionValue& value )
 	float dashStrength = movementData->DASH_STRENGTH;
 
 	LaunchCharacter ( dashDirection.GetSafeNormal () * dashStrength , true , true );
+
+	if (playerAnim && !playerAnim->GetIsCrouch ())
+	{
+		playerAnim->PlayDashMontage ();
+	}
 }
 
 void AK_Player::OnPlayerCrouchStarted ( const FInputActionValue& value )
