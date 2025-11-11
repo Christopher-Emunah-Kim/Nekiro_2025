@@ -44,6 +44,7 @@ public:
 	UFUNCTION()
 	void AnimNotify_NextAttackCheck ();
 
+	void PlayDashMontage ();
 	void PlayDeathMontage ();
 	void SetIsDead ( bool bDead );
 
@@ -63,6 +64,9 @@ protected:
 
 	UPROPERTY ( EditAnywhere , BlueprintReadWrite , Category = "NEKIRO|Animation" )
 	class UAnimMontage* deathMontage;
+
+	UPROPERTY ( EditAnywhere , BlueprintReadWrite , Category = "NEKIRO|Animation" )
+	class UAnimMontage* dashMontage;
 
 	TArray<FName> attackSectionNames;
 

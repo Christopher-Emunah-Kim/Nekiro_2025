@@ -161,6 +161,18 @@ void UK_PlayerAnim::AnimNotify_NextAttackCheck ()
 	}
 }
 
+void UK_PlayerAnim::PlayDashMontage()
+{
+	if(!dashMontage)
+	{
+		UE_LOG ( LogTemp , Warning , TEXT ( "DashMontage is nullptr!" ) );
+		return;
+	}
+
+	Montage_Stop(0.2f);
+	Montage_Play(dashMontage, 1.f);
+}
+
 void UK_PlayerAnim::PlayDeathMontage ()
 {
 	if(!deathMontage)

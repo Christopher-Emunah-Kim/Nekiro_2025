@@ -69,6 +69,9 @@ public:
 	UPROPERTY ( EditAnywhere, BlueprintReadOnly, Category = "NEKIRO|Movement|Player", meta = ( ClampMin = "0.0"))
 	float SPRINT_SPEED = 600.0f;
 
+	UPROPERTY ( EditAnywhere, BlueprintReadOnly, Category = "NEKIRO|Movement|Player", meta = ( ClampMin = "0.0"))
+	float DASH_STRENGTH = 2400.0f;
+
 	//Boss Movement
 	UPROPERTY ( EditAnywhere, BlueprintReadOnly, Category = "NEKIRO|Movement|Boss", meta = ( ClampMin = "0.0"))
 	float BOSS_WALK_SPEED = 180.0f;
@@ -91,12 +94,12 @@ class NEKIRO_API UK_StatusData : public UDataAsset
 
 public:
 	UPROPERTY ( EditAnywhere , BlueprintReadOnly , Category = "NEKIRO|Status|Player" , meta = (ClampMin = "0.0") )
-	float PLAYER_MAX_HEALTH = 100;
+	float PLAYER_MAX_HEALTH = 300;
 
 	UPROPERTY ( EditAnywhere , BlueprintReadOnly , Category = "NEKIRO|Status|Player" , meta = (ClampMin = "0.0") )
 	float PLAYER_HEALTH_REGEN_RATE = 3.0f;
 
 	UPROPERTY ( EditAnywhere , BlueprintReadOnly , Category = "NEKIRO|Status|Boss" , meta = (ClampMin = "0.0") )
-	float BOSS_MAX_HEALTH = 100.0f;
+	float BOSS_MAX_HEALTH = 400.0f;
 
 };
